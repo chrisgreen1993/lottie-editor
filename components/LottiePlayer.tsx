@@ -7,7 +7,7 @@ interface LottiePlayerProps {
 
 export const LottiePlayer = ({ src }: LottiePlayerProps) => {
   return (
-    <Player src={src} autoplay loop className="h-[80vh]">
+    <Player src={src} loop className="h-[80vh]">
       <Controls visible />
     </Player>
   )
