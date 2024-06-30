@@ -3,11 +3,12 @@
 import dynamic from 'next/dynamic';
 import { useState } from 'react'
 import { FileUpload } from './ui/FileUpload'
-import TestAnimationData from '@/lib/test_animation.json';
+import { useAnimation } from '@/lib/hooks/useAnimation';
+
 const LottiePlayer = dynamic(() => import('./LottiePlayer').then((module) => module.LottiePlayer), { ssr: false });
 
 export const MainCanvas = () => {
-  const [animationData, setAnimationData] = useState(TestAnimationData);
+  const { animationData, setAnimationData } = useAnimation();
 
   const handleUpload = (file?: File) => {
     if (file) {
