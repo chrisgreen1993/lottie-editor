@@ -1,4 +1,3 @@
-
 export const EditLayerSidebar = () => {
   return (
     <div className="border-l bg-muted/40 p-4">
@@ -28,5 +27,5 @@ export const EditLayerSidebar = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};

@@ -1,7 +1,11 @@
-"use client"
+"use client";
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { AnimationRoot, animationJsonToTree, animationTreeToJson } from '@/lib/animationTree';
+import React, { createContext, useContext, useEffect, useState } from "react";
+import {
+  AnimationRoot,
+  animationJsonToTree,
+  animationTreeToJson,
+} from "@/lib/animationTree";
 
 interface AnimationContext {
   animationTree: AnimationRoot | null;
@@ -20,30 +24,34 @@ const AnimationContext = createContext<AnimationContext>({
 });
 
 const getInitialAnimation = () => {
-  const animationJson = localStorage.getItem('animationJson')
-  return animationJson ? animationJsonToTree(animationJson) : null
-}
+  const animationJson = localStorage.getItem("animationJson");
+  return animationJson ? animationJsonToTree(animationJson) : null;
+};
 
 export const AnimationProvider = ({ children }: AnimationProviderProps) => {
-  const [animationTree, setAnimationTree] = useState<AnimationRoot | null>(getInitialAnimation)
+  const [animationTree, setAnimationTree] = useState<AnimationRoot | null>(
+    getInitialAnimation,
+  );
 
   useEffect(() => {
     if (animationTree) {
-      const animationJson = animationTreeToJson(animationTree)
-      localStorage.setItem('animationJson', animationJson)
+      const animationJson = animationTreeToJson(animationTree);
+      localStorage.setItem("animationJson", animationJson);
     }
-  }, [animationTree])
+  }, [animationTree]);
 
   const handleSetAnimationTree = (animationJson: string) => {
-    setAnimationTree(animationJsonToTree(animationJson))
-  }
+    setAnimationTree(animationJsonToTree(animationJson));
+  };
 
   return (
-    <AnimationContext.Provider value={{
-      animationTree,
-      animationJson: animationTree && animationTreeToJson(animationTree),
-      setAnimationTree: handleSetAnimationTree,
-    }}>
+    <AnimationContext.Provider
+      value={{
+        animationTree,
+        animationJson: animationTree && animationTreeToJson(animationTree),
+        setAnimationTree: handleSetAnimationTree,
+      }}
+    >
       {children}
     </AnimationContext.Provider>
   );

@@ -1,6 +1,6 @@
-import Link from 'next/link'
-import { Button } from './ui/Button'
-import { Link as LinkIcon } from 'lucide-react'
+import Link from "next/link";
+import { Button } from "./ui/Button";
+import { Link as LinkIcon } from "lucide-react";
 
 export const NavBar = () => {
   return (
@@ -12,10 +12,10 @@ export const NavBar = () => {
       </div>
       <div className="flex items-center gap-4">
         <Button variant="outline">
-          <LinkIcon className='h-4 w-4 mr-2' />
+          <LinkIcon className="h-4 w-4 mr-2" />
           Share
         </Button>
       </div>
     </header>
-  )
-}
+  );
+};

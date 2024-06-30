@@ -1,10 +1,13 @@
-"use client"
+"use client";
 
-import dynamic from 'next/dynamic';
-import { FileUpload } from './ui/FileUpload'
-import { useAnimation } from '@/lib/hooks/useAnimation';
+import dynamic from "next/dynamic";
+import { FileUpload } from "./ui/FileUpload";
+import { useAnimation } from "@/lib/hooks/useAnimation";
 
-const LottiePlayer = dynamic(() => import('./LottiePlayer').then((module) => module.LottiePlayer), { ssr: false });
+const LottiePlayer = dynamic(
+  () => import("./LottiePlayer").then((module) => module.LottiePlayer),
+  { ssr: false },
+);
 
 export const MainCanvas = () => {
   const { animationJson, setAnimationTree } = useAnimation();
@@ -20,7 +23,6 @@ export const MainCanvas = () => {
     }
   };
 
-
   return (
     <div className="flex-1 p-4">
       <div className="flex h-full flex-col">
@@ -35,5 +37,5 @@ export const MainCanvas = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};

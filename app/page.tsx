@@ -1,8 +1,8 @@
-import { MainCanvas } from "@/components/MainCanvas"
-import { NavBar } from "@/components/Navbar"
-import { LayerListSidebar } from "@/components/LayerListSidebar"
-import { EditLayerSidebar } from "@/components/EditLayerSidebar"
-import { AnimationProvider } from "@/lib/hooks/useAnimation"
+import { MainCanvas } from "@/components/MainCanvas";
+import { NavBar } from "@/components/Navbar";
+import { LayerListSidebar } from "@/components/LayerListSidebar";
+import { EditLayerSidebar } from "@/components/EditLayerSidebar";
+import { AnimationProvider } from "@/lib/hooks/useAnimation";
 
 export default function Home() {
   return (
@@ -16,5 +16,5 @@ export default function Home() {
         </div>
       </div>
     </AnimationProvider>
-  )
+  );
 }

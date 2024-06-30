@@ -1,14 +1,17 @@
-import { Player, Controls, IPlayerProps } from '@lottiefiles/react-lottie-player'
+import {
+  Player,
+  Controls,
+  IPlayerProps,
+} from "@lottiefiles/react-lottie-player";
 
 interface LottiePlayerProps {
-  src: IPlayerProps['src']
+  src: IPlayerProps["src"];
 }
-
 
 export const LottiePlayer = ({ src }: LottiePlayerProps) => {
   return (
     <Player src={src} loop className="h-[80vh]">
       <Controls visible />
     </Player>
-  )
-}
+  );
+};

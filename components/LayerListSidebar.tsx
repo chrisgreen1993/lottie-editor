@@ -1,4 +1,3 @@
-
 export const LayerListSidebar = () => {
   return (
     <div className="border-r bg-muted/40 p-4">
@@ -28,5 +27,5 @@ export const LayerListSidebar = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
