@@ -1,14 +1,13 @@
 "use client"
 
 import dynamic from 'next/dynamic';
-import { useState } from 'react'
 import { FileUpload } from './ui/FileUpload'
 import { useAnimation } from '@/lib/hooks/useAnimation';
 
 const LottiePlayer = dynamic(() => import('./LottiePlayer').then((module) => module.LottiePlayer), { ssr: false });
 
 export const MainCanvas = () => {
-  const { animationData, setAnimationData } = useAnimation();
+  const { animationJson, setAnimationData } = useAnimation();
 
   const handleUpload = (file?: File) => {
     if (file) {
@@ -27,8 +26,8 @@ export const MainCanvas = () => {
       <div className="flex h-full flex-col">
         <div className="mt-4 flex-1 rounded-md bg-muted/40">
           <div className="flex h-full items-center justify-center">
-            {animationData ? (
-              <LottiePlayer src={animationData} />
+            {animationJson ? (
+              <LottiePlayer src={animationJson} />
             ) : (
               <FileUpload onUpload={handleUpload} />
             )}
