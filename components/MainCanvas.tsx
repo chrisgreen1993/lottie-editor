@@ -1,9 +1,10 @@
 "use client"
 
+import dynamic from 'next/dynamic';
 import { useState } from 'react'
 import { FileUpload } from './ui/FileUpload'
-import { Player, Controls } from '@lottiefiles/react-lottie-player';
 import TestAnimationData from '@/lib/test_animation.json';
+const LottiePlayer = dynamic(() => import('./LottiePlayer').then((module) => module.LottiePlayer), { ssr: false });
 
 export const MainCanvas = () => {
   const [animationData, setAnimationData] = useState(TestAnimationData);
@@ -26,9 +27,7 @@ export const MainCanvas = () => {
         <div className="mt-4 flex-1 rounded-md bg-muted/40">
           <div className="flex h-full items-center justify-center">
             {animationData ? (
-              <Player src={animationData} autoplay loop className="h-[80vh]">
-                <Controls visible />
-              </Player>
+              <LottiePlayer src={animationData} />
             ) : (
               <FileUpload onUpload={handleUpload} />
             )}
