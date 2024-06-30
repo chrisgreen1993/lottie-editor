@@ -9,12 +9,12 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@lottiefiles/lottie-js": "^0.4.2",
+    "@lottiefiles/last": "^1.5.0",
     "@lottiefiles/react-lottie-player": "^3.5.4",
+    "@lottiefiles/relottie": "^1.5.0",
     "@radix-ui/react-slot": "^1.1.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
-    "lottie-react": "^2.4.0",
     "lucide-react": "^0.399.0",
     "next": "14.2.4",
     "react": "^18.3.1",

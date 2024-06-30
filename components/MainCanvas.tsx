@@ -7,14 +7,14 @@ import { useAnimation } from '@/lib/hooks/useAnimation';
 const LottiePlayer = dynamic(() => import('./LottiePlayer').then((module) => module.LottiePlayer), { ssr: false });
 
 export const MainCanvas = () => {
-  const { animationJson, setAnimationData } = useAnimation();
+  const { animationJson, setAnimationTree } = useAnimation();
 
   const handleUpload = (file?: File) => {
     if (file) {
       const reader = new FileReader();
       reader.onload = (e) => {
-        const animationJson = JSON.parse(e?.target?.result as string);
-        setAnimationData(animationJson);
+        const animationJson = e?.target?.result as string;
+        setAnimationTree(animationJson);
       };
       reader.readAsText(file);
     }

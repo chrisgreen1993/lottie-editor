@@ -1,12 +1,12 @@
 "use client"
 
-import { Animation } from '@lottiefiles/lottie-js';
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { AnimationRoot, animationJsonToTree, animationTreeToJson } from '@/lib/animationTree';
 
 interface AnimationContext {
-  animationData: Animation | null;
-  animationJson: object | null;
-  setAnimationData: (animationJson: object) => void;
+  animationTree: AnimationRoot | null;
+  animationJson: string | null;
+  setAnimationTree: (animationJson: string) => void;
 }
 
 interface AnimationProviderProps {
@@ -14,44 +14,35 @@ interface AnimationProviderProps {
 }
 
 const AnimationContext = createContext<AnimationContext>({
-  animationData: null,
+  animationTree: null,
   animationJson: null,
-  setAnimationData: () => null,
+  setAnimationTree: () => null,
 });
 
-const animationJsonToAnimation = (animationJson: object): Animation => {
-  return new Animation().fromJSON(animationJson);
-}
-
-const animationToAnimationJson = (animation: Animation): object => {
-  return JSON.parse(JSON.stringify(animation));
-}
-
 const getInitialAnimation = () => {
-  const animationJSON = localStorage.getItem('animationJSON')
-  return animationJSON ? animationJsonToAnimation(JSON.parse(animationJSON)) : null;
+  const animationJson = localStorage.getItem('animationJson')
+  return animationJson ? animationJsonToTree(animationJson) : null
 }
 
 export const AnimationProvider = ({ children }: AnimationProviderProps) => {
-  const [animationData, setAnimationData] = useState<Animation | null>(getInitialAnimation);
+  const [animationTree, setAnimationTree] = useState<AnimationRoot | null>(getInitialAnimation)
 
   useEffect(() => {
-    if (animationData) {
-      localStorage.setItem('animationJSON', JSON.stringify(animationToAnimationJson(animationData)))
+    if (animationTree) {
+      const animationJson = animationTreeToJson(animationTree)
+      localStorage.setItem('animationJson', animationJson)
     }
-  }, [animationData])
+  }, [animationTree])
 
-  const animationJson = animationData && animationToAnimationJson(animationData);
-
-  const handleSetAnimationData = (animationJson: object) => {
-    setAnimationData(animationJsonToAnimation(animationJson));
+  const handleSetAnimationTree = (animationJson: string) => {
+    setAnimationTree(animationJsonToTree(animationJson))
   }
 
   return (
     <AnimationContext.Provider value={{
-      animationJson,
-      animationData,
-      setAnimationData: handleSetAnimationData,
+      animationTree,
+      animationJson: animationTree && animationTreeToJson(animationTree),
+      setAnimationTree: handleSetAnimationTree,
     }}>
       {children}
     </AnimationContext.Provider>
