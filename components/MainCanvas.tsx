@@ -10,14 +10,14 @@ const LottiePlayer = dynamic(
 );
 
 export const MainCanvas = () => {
-  const { animationJson, setAnimationTree } = useAnimation();
+  const { animationJson, setAnimationJson } = useAnimation();
 
   const handleUpload = (file?: File) => {
     if (file) {
       const reader = new FileReader();
       reader.onload = (e) => {
         const animationJson = e?.target?.result as string;
-        setAnimationTree(animationJson);
+        setAnimationJson(JSON.parse(animationJson));
       };
       reader.readAsText(file);
     }

@@ -1,16 +1,11 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
-import {
-  AnimationRoot,
-  animationJsonToTree,
-  animationTreeToJson,
-} from "@/lib/animationTree";
+import { Animation } from "@lottie-animation-community/lottie-types";
 
 interface AnimationContext {
-  animationTree: AnimationRoot | null;
-  animationJson: string | null;
-  setAnimationTree: (animationJson: string) => void;
+  animationJson: Animation | null;
+  setAnimationJson: (animationJson: Animation) => void;
 }
 
 interface AnimationProviderProps {
@@ -18,38 +13,35 @@ interface AnimationProviderProps {
 }
 
 const AnimationContext = createContext<AnimationContext>({
-  animationTree: null,
   animationJson: null,
-  setAnimationTree: () => null,
+  setAnimationJson: () => null,
 });
 
-const getInitialAnimation = () => {
+const getInitialAnimationJson = () => {
   const animationJson = localStorage.getItem("animationJson");
-  return animationJson ? animationJsonToTree(animationJson) : null;
+  return animationJson ? JSON.parse(animationJson) : null;
 };
 
 export const AnimationProvider = ({ children }: AnimationProviderProps) => {
-  const [animationTree, setAnimationTree] = useState<AnimationRoot | null>(
-    getInitialAnimation,
+  const [animationJson, setAnimationJson] = useState<Animation | null>(
+    getInitialAnimationJson,
   );
 
   useEffect(() => {
-    if (animationTree) {
-      const animationJson = animationTreeToJson(animationTree);
-      localStorage.setItem("animationJson", animationJson);
+    if (animationJson) {
+      localStorage.setItem("animationJson", JSON.stringify(animationJson));
     }
-  }, [animationTree]);
+  }, [animationJson]);
 
-  const handleSetAnimationTree = (animationJson: string) => {
-    setAnimationTree(animationJsonToTree(animationJson));
+  const handleSetAnimationJson = (animationJson: Animation) => {
+    setAnimationJson(animationJson);
   };
 
   return (
     <AnimationContext.Provider
       value={{
-        animationTree,
-        animationJson: animationTree && animationTreeToJson(animationTree),
-        setAnimationTree: handleSetAnimationTree,
+        animationJson,
+        setAnimationJson: handleSetAnimationJson,
       }}
     >
       {children}

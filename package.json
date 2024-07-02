@@ -10,9 +10,8 @@
     "format": "prettier --write --ignore-path .gitignore ."
   },
   "dependencies": {
-    "@lottiefiles/last": "^1.5.0",
+    "@lottie-animation-community/lottie-types": "^1.1.0",
     "@lottiefiles/react-lottie-player": "^3.5.4",
-    "@lottiefiles/relottie": "^1.5.0",
     "@radix-ui/react-slot": "^1.1.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
