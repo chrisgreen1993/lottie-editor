@@ -8,7 +8,7 @@ export const LayerListSidebar = () => {
   const { animationJson } = useAnimation();
   const layers = animationJson ? getAnimationLayers(animationJson) : [];
   return (
-    <div className="border-r bg-muted/40 p-4">
+    <div className="border-r bg-muted/40 p-4 min-w-52">
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-medium">Layers</h3>

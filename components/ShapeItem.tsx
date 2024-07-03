@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Group } from "lucide-react";
 import { ShapeInfo } from "@/lib/animation";
+import { useAnimation } from "@/lib/hooks/useAnimation";
 
 interface ShapeItemProps {
   shape: ShapeInfo;
@@ -8,13 +9,23 @@ interface ShapeItemProps {
 }
 
 export const ShapeItem = ({ shape, depth = 0 }: ShapeItemProps) => {
-  const isGroup = shape.children.length > 0;
+  const { setSelectedShape } = useAnimation();
   const [isExpanded, setIsExpanded] = useState(false);
+
+  const isGroup = shape.children.length > 0;
+
+  const handleClick = () => {
+    isGroup ? setIsExpanded(!isExpanded) : setSelectedShape(shape);
+  };
+
   return (
-    <div style={{ paddingLeft: `${depth + 1}rem` }}>
+    <div
+      className="flex flex-col gap-2"
+      style={{ paddingLeft: `${depth + 1}rem` }}
+    >
       <div
         className={`flex items-center justify-between rounded-md bg-background px-3 py-2 hover:bg-muted ${isGroup ? "cursor-pointer" : ""}`}
-        onClick={() => isGroup && setIsExpanded(!isExpanded)}
+        onClick={handleClick}
       >
         <div className="flex items-center gap-2">
           {isGroup ? (

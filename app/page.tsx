@@ -1,7 +1,7 @@
 import { MainCanvas } from "@/components/MainCanvas";
 import { NavBar } from "@/components/Navbar";
 import { LayerListSidebar } from "@/components/LayerListSidebar";
-import { EditLayerSidebar } from "@/components/EditLayerSidebar";
+import { EditShapeSidebar } from "@/components/EditShapeSidebar";
 import { AnimationProvider } from "@/lib/hooks/useAnimation";
 
 export default function Home() {
@@ -12,7 +12,7 @@ export default function Home() {
         <div className="flex flex-1">
           <LayerListSidebar />
           <MainCanvas />
-          <EditLayerSidebar />
+          <EditShapeSidebar />
         </div>
       </div>
     </AnimationProvider>

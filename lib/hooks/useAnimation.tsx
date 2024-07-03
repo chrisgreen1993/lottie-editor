@@ -2,10 +2,13 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { Animation } from "@lottie-animation-community/lottie-types";
+import { ShapeInfo } from "../animation";
 
 interface AnimationContext {
   animationJson: Animation | null;
   setAnimationJson: (animationJson: Animation) => void;
+  selectedShape: ShapeInfo | null;
+  setSelectedShape: (shape: ShapeInfo) => void;
 }
 
 interface AnimationProviderProps {
@@ -15,6 +18,8 @@ interface AnimationProviderProps {
 const AnimationContext = createContext<AnimationContext>({
   animationJson: null,
   setAnimationJson: () => null,
+  selectedShape: null,
+  setSelectedShape: () => null,
 });
 
 const getInitialAnimationJson = () => {
@@ -26,6 +31,7 @@ export const AnimationProvider = ({ children }: AnimationProviderProps) => {
   const [animationJson, setAnimationJson] = useState<Animation | null>(
     getInitialAnimationJson,
   );
+  const [selectedShape, setSelectedShape] = useState<ShapeInfo | null>(null);
 
   useEffect(() => {
     if (animationJson) {
@@ -42,6 +48,8 @@ export const AnimationProvider = ({ children }: AnimationProviderProps) => {
       value={{
         animationJson,
         setAnimationJson: handleSetAnimationJson,
+        selectedShape,
+        setSelectedShape,
       }}
     >
       {children}

@@ -15,11 +15,13 @@ const ShapeTypes = {
 };
 
 export interface LayerInfo {
+  path: string;
   name: string;
   shapes: ShapeInfo[];
 }
 
 export interface ShapeInfo {
+  path: string;
   name: string;
   colorRgb: number[];
   children: ShapeInfo[];
@@ -27,14 +29,19 @@ export interface ShapeInfo {
 
 export const getAnimationLayers = (animation: Animation): LayerInfo[] => {
   const layers = animation.layers;
-  return layers.map((layer) => {
+  return layers.map((layer, i) => {
+    const path = `layers.${i}`;
     const layerInfo: LayerInfo = {
+      path: path,
       name: layer.nm || "Unnamed Layer",
       shapes: [],
     };
     switch (layer.ty) {
       case LayerTypes.Shape:
-        layerInfo.shapes = getShapesFromLayer((layer as Layer.Shape).shapes);
+        layerInfo.shapes = getShapesFromLayer(
+          (layer as Layer.Shape).shapes,
+          `${path}.shapes`,
+        );
         break;
       default:
         break;
@@ -43,9 +50,14 @@ export const getAnimationLayers = (animation: Animation): LayerInfo[] => {
   });
 };
 
-const getShapesFromLayer = (shapes: Shape.Value[]): ShapeInfo[] => {
-  return shapes.map((shape) => {
+const getShapesFromLayer = (
+  shapes: Shape.Value[],
+  parentPath: string,
+): ShapeInfo[] => {
+  return shapes.map((shape, i) => {
+    const path = `${parentPath}.${i}`;
     const shapeInfo: ShapeInfo = {
+      path: path,
       name: shape.nm || "Unnamed Shape",
       colorRgb: [],
       children: [],
@@ -60,6 +72,7 @@ const getShapesFromLayer = (shapes: Shape.Value[]): ShapeInfo[] => {
       case ShapeTypes.Group:
         shapeInfo.children = getShapesFromLayer(
           (shape as Shape.Group).it || [],
+          `${path}.it`,
         );
         break;
     }
