@@ -21,7 +21,8 @@ export const LayerItem = ({ layer }: LayerListProps) => {
           <span className="text-sm font-medium">{layer.name}</span>
         </div>
       </div>
-      {isExpanded && layer.shapes.map((shape) => <ShapeItem shape={shape} />)}
+      {isExpanded &&
+        layer.shapes.map((shape, i) => <ShapeItem key={i} shape={shape} />)}
     </div>
   );
 };

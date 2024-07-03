@@ -17,8 +17,8 @@ export const LayerListSidebar = () => {
           className="flex flex-col gap-2 h-[calc(100vh-9rem)] overflow-x-scroll"
           style={{ scrollbarWidth: "none" }}
         >
-          {layers.map((layer) => (
-            <LayerItem layer={layer} />
+          {layers.map((layer, i) => (
+            <LayerItem key={i} layer={layer} />
           ))}
         </div>
       </div>
