@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/Popover";
 import { RgbaStringColorPicker } from "react-colorful";
 import { SidebarItem } from "./SidebarItem";
+import { ColorIcon } from "./ui/ColorIcon";
 
 export const EditShapeSidebar = () => {
   const { selectedShape } = useAnimation();
@@ -23,12 +24,7 @@ export const EditShapeSidebar = () => {
             <Popover>
               <PopoverTrigger>
                 <SidebarItem text="Color">
-                  <div
-                    className="h-4 w-4 rounded-full"
-                    style={{
-                      backgroundColor: `rgba(${selectedShape.colorRgb.join(",")})`,
-                    }}
-                  />
+                  <ColorIcon color={selectedShape.colorRgb} />
                 </SidebarItem>
               </PopoverTrigger>
               <PopoverContent>

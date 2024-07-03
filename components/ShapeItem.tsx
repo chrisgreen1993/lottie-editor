@@ -3,6 +3,7 @@ import { Group } from "lucide-react";
 import { ShapeInfo } from "@/lib/animation";
 import { useAnimation } from "@/lib/hooks/useAnimation";
 import { SidebarItem } from "./SidebarItem";
+import { ColorIcon } from "./ui/ColorIcon";
 
 interface ShapeItemProps {
   shape: ShapeInfo;
@@ -28,10 +29,7 @@ export const ShapeItem = ({ shape, depth = 0 }: ShapeItemProps) => {
         {isGroup ? (
           <Group className="h-4 w-4" />
         ) : (
-          <div
-            className="h-4 w-4 rounded-full bg-accent"
-            style={{ backgroundColor: `rgba(${shape.colorRgb.join(",")})` }}
-          />
+          <ColorIcon color={shape.colorRgb} />
         )}
       </SidebarItem>
       {isExpanded &&
