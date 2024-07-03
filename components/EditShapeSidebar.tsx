@@ -6,8 +6,9 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
-import { HexColorInput, RgbaStringColorPicker } from "react-colorful";
+} from "@/components/ui/Popover";
+import { RgbaStringColorPicker } from "react-colorful";
+import { SidebarItem } from "./SidebarItem";
 
 export const EditShapeSidebar = () => {
   const { selectedShape } = useAnimation();
@@ -21,17 +22,14 @@ export const EditShapeSidebar = () => {
           <div className="flex flex-col gap-2">
             <Popover>
               <PopoverTrigger>
-                <div className="flex items-center justify-between rounded-md bg-background px-3 py-2">
-                  <div className="flex items-center gap-2">
-                    <div
-                      className="h-4 w-4 rounded-full"
-                      style={{
-                        backgroundColor: `rgba(${selectedShape.colorRgb.join(",")})`,
-                      }}
-                    />
-                    <span className="text-sm font-medium">Color</span>
-                  </div>
-                </div>
+                <SidebarItem text="Color">
+                  <div
+                    className="h-4 w-4 rounded-full"
+                    style={{
+                      backgroundColor: `rgba(${selectedShape.colorRgb.join(",")})`,
+                    }}
+                  />
+                </SidebarItem>
               </PopoverTrigger>
               <PopoverContent>
                 <RgbaStringColorPicker

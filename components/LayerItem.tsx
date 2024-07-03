@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Layers } from "lucide-react";
+import { Layers, Sidebar } from "lucide-react";
 import { LayerInfo } from "@/lib/animation";
 import { ShapeItem } from "./ShapeItem";
+import { SidebarItem } from "./SidebarItem";
 
 interface LayerListProps {
   layer: LayerInfo;
@@ -12,15 +13,9 @@ export const LayerItem = ({ layer }: LayerListProps) => {
 
   return (
     <div className="flex flex-col gap-2">
-      <div
-        onClick={() => setIsExpanded(!isExpanded)}
-        className="flex items-center justify-between rounded-md bg-background px-3 py-2 hover:bg-muted cursor-pointer"
-      >
-        <div className="flex items-center gap-2">
-          <Layers className="h-4 w-4" />
-          <span className="text-sm font-medium">{layer.name}</span>
-        </div>
-      </div>
+      <SidebarItem text={layer.name} onClick={() => setIsExpanded(!isExpanded)}>
+        <Layers className="h-4 w-4" />
+      </SidebarItem>
       {isExpanded &&
         layer.shapes.map((shape, i) => <ShapeItem key={i} shape={shape} />)}
     </div>
