@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { Animation } from "@lottie-animation-community/lottie-types";
-import { ShapeInfo, updateShapeColor } from "../animation";
+import { updateShapeColor } from "../animation";
 
 interface AnimationContext {
   animationJson: Animation | null;

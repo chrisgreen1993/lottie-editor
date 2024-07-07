@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Layers, Sidebar } from "lucide-react";
+import { Layers } from "lucide-react";
 import { LayerInfo } from "@/lib/animation";
 import { ShapeItem } from "./ShapeItem";
 import { SidebarItem } from "./SidebarItem";

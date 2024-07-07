@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent, DragEvent, useRef, useState } from "react";
+import { ChangeEvent, DragEvent, useRef } from "react";
 import { Button } from "@/components/ui/Button";
 import { Upload as UploadIcon } from "lucide-react";
 
