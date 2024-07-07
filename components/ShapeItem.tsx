@@ -11,13 +11,13 @@ interface ShapeItemProps {
 }
 
 export const ShapeItem = ({ shape, depth = 0 }: ShapeItemProps) => {
-  const { setSelectedShape } = useAnimation();
+  const { setSelectedShapePath } = useAnimation();
   const [isExpanded, setIsExpanded] = useState(false);
 
   const isGroup = shape.children.length > 0;
 
   const handleClick = () => {
-    isGroup ? setIsExpanded(!isExpanded) : setSelectedShape(shape);
+    isGroup ? setIsExpanded(!isExpanded) : setSelectedShapePath(shape.path);
   };
 
   return (

@@ -3,6 +3,7 @@ import {
   Layer,
   Shape,
 } from "@lottie-animation-community/lottie-types";
+import { set, get } from "lodash-es";
 
 const LayerTypes = {
   Shape: 4,
@@ -50,35 +51,36 @@ export const getAnimationLayers = (animation: Animation): LayerInfo[] => {
   });
 };
 
+export const getShape = (shape: Shape.Value, path: string): ShapeInfo => {
+  const shapeInfo: ShapeInfo = {
+    path: path,
+    name: shape.nm || "Unnamed Shape",
+    colorRgb: [],
+    children: [],
+  };
+  switch (shape.ty) {
+    case ShapeTypes.Fill:
+      shapeInfo.colorRgb = getColorsFromFillShape(shape as Shape.Fill);
+      break;
+    case ShapeTypes.Stroke:
+      shapeInfo.colorRgb = getColorsFromStrokeShape(shape as Shape.Stroke);
+      break;
+    case ShapeTypes.Group:
+      shapeInfo.children = getShapesFromLayer(
+        (shape as Shape.Group).it || [],
+        `${path}.it`,
+      );
+      break;
+  }
+
+  return shapeInfo;
+};
+
 const getShapesFromLayer = (
   shapes: Shape.Value[],
-  parentPath: string,
+  path: string,
 ): ShapeInfo[] => {
-  return shapes.map((shape, i) => {
-    const path = `${parentPath}.${i}`;
-    const shapeInfo: ShapeInfo = {
-      path: path,
-      name: shape.nm || "Unnamed Shape",
-      colorRgb: [],
-      children: [],
-    };
-    switch (shape.ty) {
-      case ShapeTypes.Fill:
-        shapeInfo.colorRgb = getColorsFromFillShape(shape as Shape.Fill);
-        break;
-      case ShapeTypes.Stroke:
-        shapeInfo.colorRgb = getColorsFromStrokeShape(shape as Shape.Stroke);
-        break;
-      case ShapeTypes.Group:
-        shapeInfo.children = getShapesFromLayer(
-          (shape as Shape.Group).it || [],
-          `${path}.it`,
-        );
-        break;
-    }
-
-    return shapeInfo;
-  });
+  return shapes.map((shape, i) => getShape(shape, `${path}.${i}`));
 };
 
 const getColorsFromFillShape = (shape: Shape.Fill): number[] => {
@@ -99,4 +101,25 @@ const toRgbColor = (color: number[]): number[] => {
     Math.round(b * 255),
     a === undefined ? 1 : a,
   ];
+};
+
+const fromRgbColor = (color: number[]): number[] => {
+  const [r, g, b, a] = color;
+  return [r / 255, g / 255, b / 255, a];
+};
+
+export const getSelectedShape = (
+  animation: Animation,
+  path: string,
+): ShapeInfo => {
+  const shape = get(animation, path) as Shape.Value;
+  return getShape(shape, path);
+};
+
+export const updateShapeColor = (
+  animation: Animation,
+  shapePath: string,
+  color: number[],
+) => {
+  return set({ ...animation }, `${shapePath}.c.k`, fromRgbColor(color));
 };

@@ -1,18 +1,39 @@
 "use client";
 
-import { useRef } from "react";
 import { useAnimation } from "@/lib/hooks/useAnimation";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/Popover";
-import { RgbaStringColorPicker } from "react-colorful";
+import { RgbaColor, RgbaColorPicker } from "react-colorful";
 import { SidebarItem } from "./SidebarItem";
 import { ColorIcon } from "./ui/ColorIcon";
+import { getSelectedShape } from "@/lib/animation";
+
+const colorToObject = (color: number[]): RgbaColor => {
+  const [r, g, b, a] = color;
+  return { r, g, b, a };
+};
+
+const objectToColor = (color: RgbaColor): number[] => {
+  const { r, g, b, a } = color;
+  return [r, g, b, a];
+};
 
 export const EditShapeSidebar = () => {
-  const { selectedShape } = useAnimation();
+  const { animationJson, selectedShapePath, updateSelectedShapeColor } =
+    useAnimation();
+
+  const selectedShape =
+    animationJson &&
+    selectedShapePath &&
+    getSelectedShape(animationJson, selectedShapePath);
+
+  const handleColorChange = (color: RgbaColor) => {
+    updateSelectedShapeColor(objectToColor(color));
+  };
+
   return (
     <div className="border-l bg-muted/40 p-4 min-w-52">
       {selectedShape && (
@@ -28,8 +49,9 @@ export const EditShapeSidebar = () => {
                 </SidebarItem>
               </PopoverTrigger>
               <PopoverContent>
-                <RgbaStringColorPicker
-                  color={`rgba(${selectedShape.colorRgb.join(",")})`}
+                <RgbaColorPicker
+                  color={colorToObject(selectedShape.colorRgb)}
+                  onChange={handleColorChange}
                 />
               </PopoverContent>
             </Popover>

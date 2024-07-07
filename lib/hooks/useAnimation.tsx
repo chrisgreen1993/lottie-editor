@@ -2,13 +2,14 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { Animation } from "@lottie-animation-community/lottie-types";
-import { ShapeInfo } from "../animation";
+import { ShapeInfo, updateShapeColor } from "../animation";
 
 interface AnimationContext {
   animationJson: Animation | null;
   setAnimationJson: (animationJson: Animation) => void;
-  selectedShape: ShapeInfo | null;
-  setSelectedShape: (shape: ShapeInfo) => void;
+  selectedShapePath: string | null;
+  setSelectedShapePath: (path: string) => void;
+  updateSelectedShapeColor: (color: number[]) => void;
 }
 
 interface AnimationProviderProps {
@@ -18,8 +19,9 @@ interface AnimationProviderProps {
 const AnimationContext = createContext<AnimationContext>({
   animationJson: null,
   setAnimationJson: () => null,
-  selectedShape: null,
-  setSelectedShape: () => null,
+  selectedShapePath: null,
+  setSelectedShapePath: () => null,
+  updateSelectedShapeColor: () => null,
 });
 
 const getInitialAnimationJson = () => {
@@ -31,7 +33,7 @@ export const AnimationProvider = ({ children }: AnimationProviderProps) => {
   const [animationJson, setAnimationJson] = useState<Animation | null>(
     getInitialAnimationJson,
   );
-  const [selectedShape, setSelectedShape] = useState<ShapeInfo | null>(null);
+  const [selectedShapePath, setSelectedShapePath] = useState<string>("");
 
   useEffect(() => {
     if (animationJson) {
@@ -43,13 +45,22 @@ export const AnimationProvider = ({ children }: AnimationProviderProps) => {
     setAnimationJson(animationJson);
   };
 
+  const handleUpdateSelectedShapeColor = (color: number[]) => {
+    if (animationJson) {
+      setAnimationJson(
+        updateShapeColor(animationJson, selectedShapePath, color),
+      );
+    }
+  };
+
   return (
     <AnimationContext.Provider
       value={{
         animationJson,
         setAnimationJson: handleSetAnimationJson,
-        selectedShape,
-        setSelectedShape,
+        updateSelectedShapeColor: handleUpdateSelectedShapeColor,
+        selectedShapePath,
+        setSelectedShapePath,
       }}
     >
       {children}
