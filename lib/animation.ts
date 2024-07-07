@@ -8,12 +8,21 @@ import { set, get } from "lodash-es";
 const LayerTypes = {
   Shape: 4,
 };
-``;
+
 const ShapeTypes = {
   Fill: "fl",
   Stroke: "st",
   Group: "gr",
 };
+
+const defaultColor = { r: 0, g: 0, b: 0, a: 1 };
+
+export interface RgbaColor {
+  r: number;
+  g: number;
+  b: number;
+  a: number;
+}
 
 export interface LayerInfo {
   path: string;
@@ -24,7 +33,7 @@ export interface LayerInfo {
 export interface ShapeInfo {
   path: string;
   name: string;
-  colorRgb: number[];
+  colorRgb: RgbaColor;
   children: ShapeInfo[];
 }
 
@@ -55,7 +64,7 @@ export const getShape = (shape: Shape.Value, path: string): ShapeInfo => {
   const shapeInfo: ShapeInfo = {
     path: path,
     name: shape.nm || "Unnamed Shape",
-    colorRgb: [],
+    colorRgb: defaultColor,
     children: [],
   };
   switch (shape.ty) {
@@ -83,28 +92,28 @@ const getShapesFromLayer = (
   return shapes.map((shape, i) => getShape(shape, `${path}.${i}`));
 };
 
-const getColorsFromFillShape = (shape: Shape.Fill): number[] => {
+const getColorsFromFillShape = (shape: Shape.Fill): RgbaColor => {
   return toRgbColor(shape.c.k as number[]);
 };
 
-const getColorsFromStrokeShape = (shape: Shape.Stroke): number[] => {
-  if (shape.c.a === 1) return []; // TODO: handle multiple colors
+const getColorsFromStrokeShape = (shape: Shape.Stroke): RgbaColor => {
+  if (shape.c.a === 1) return defaultColor; // TODO: handle multiple colors
   return toRgbColor(shape.c.k as number[]);
 };
 
-const toRgbColor = (color: number[]): number[] => {
+const toRgbColor = (color: number[]): RgbaColor => {
   const [r, g, b, a] = color;
 
-  return [
-    Math.round(r * 255),
-    Math.round(g * 255),
-    Math.round(b * 255),
-    a === undefined ? 1 : a,
-  ];
+  return {
+    r: Math.round(r * 255),
+    g: Math.round(g * 255),
+    b: Math.round(b * 255),
+    a: a === undefined ? 1 : a,
+  };
 };
 
-const fromRgbColor = (color: number[]): number[] => {
-  const [r, g, b, a] = color;
+const fromRgbColor = (color: RgbaColor): number[] => {
+  const { r, g, b, a } = color;
   return [r / 255, g / 255, b / 255, a];
 };
 
@@ -119,7 +128,7 @@ export const getSelectedShape = (
 export const updateShapeColor = (
   animation: Animation,
   shapePath: string,
-  color: number[],
+  color: RgbaColor,
 ) => {
   return set({ ...animation }, `${shapePath}.c.k`, fromRgbColor(color));
 };

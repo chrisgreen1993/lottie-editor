@@ -6,20 +6,10 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/Popover";
-import { RgbaColor, RgbaColorPicker } from "react-colorful";
+import { RgbaColorPicker } from "react-colorful";
 import { SidebarItem } from "./SidebarItem";
 import { ColorIcon } from "./ui/ColorIcon";
-import { getSelectedShape } from "@/lib/animation";
-
-const colorToObject = (color: number[]): RgbaColor => {
-  const [r, g, b, a] = color;
-  return { r, g, b, a };
-};
-
-const objectToColor = (color: RgbaColor): number[] => {
-  const { r, g, b, a } = color;
-  return [r, g, b, a];
-};
+import { getSelectedShape, RgbaColor } from "@/lib/animation";
 
 export const EditShapeSidebar = () => {
   const { animationJson, selectedShapePath, updateSelectedShapeColor } =
@@ -31,7 +21,7 @@ export const EditShapeSidebar = () => {
     getSelectedShape(animationJson, selectedShapePath);
 
   const handleColorChange = (color: RgbaColor) => {
-    updateSelectedShapeColor(objectToColor(color));
+    updateSelectedShapeColor(color);
   };
 
   return (
@@ -50,7 +40,7 @@ export const EditShapeSidebar = () => {
               </PopoverTrigger>
               <PopoverContent>
                 <RgbaColorPicker
-                  color={colorToObject(selectedShape.colorRgb)}
+                  color={selectedShape.colorRgb}
                   onChange={handleColorChange}
                 />
               </PopoverContent>

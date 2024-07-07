@@ -2,14 +2,14 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { Animation } from "@lottie-animation-community/lottie-types";
-import { updateShapeColor } from "../animation";
+import { RgbaColor, updateShapeColor } from "../animation";
 
 interface AnimationContext {
   animationJson: Animation | null;
   setAnimationJson: (animationJson: Animation) => void;
   selectedShapePath: string | null;
   setSelectedShapePath: (path: string) => void;
-  updateSelectedShapeColor: (color: number[]) => void;
+  updateSelectedShapeColor: (color: RgbaColor) => void;
 }
 
 interface AnimationProviderProps {
@@ -45,7 +45,7 @@ export const AnimationProvider = ({ children }: AnimationProviderProps) => {
     setAnimationJson(animationJson);
   };
 
-  const handleUpdateSelectedShapeColor = (color: number[]) => {
+  const handleUpdateSelectedShapeColor = (color: RgbaColor) => {
     if (animationJson) {
       setAnimationJson(
         updateShapeColor(animationJson, selectedShapePath, color),
