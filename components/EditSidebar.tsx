@@ -70,7 +70,7 @@ export const EditSidebar = () => {
           </div>
           <Loading isLoading={isAnimationLoading} className="h-8">
             <div className="flex items-center gap-2">
-              <Label htmlFor="framerate">Framerate:</Label>
+              <Label htmlFor="framerate">Framerate</Label>
               <Input
                 id="framerate"
                 type="number"
