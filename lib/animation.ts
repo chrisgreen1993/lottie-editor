@@ -132,3 +132,11 @@ export const updateShapeColor = (
 ) => {
   return set({ ...animation }, `${shapePath}.c.k`, fromRgbColor(color));
 };
+
+export const getFramerate = (animation: Animation) => {
+  return animation.fr;
+};
+
+export const updateFramerate = (animation: Animation, framerate: number) => {
+  return { ...animation, fr: framerate };
+};

@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { Animation } from "@lottie-animation-community/lottie-types";
-import { RgbaColor, updateShapeColor } from "../animation";
+import { RgbaColor, updateFramerate, updateShapeColor } from "../animation";
 import { createStorageValue } from "../storage";
 
 interface AnimationContext {
@@ -12,6 +12,7 @@ interface AnimationContext {
   selectedShapePath: string | null;
   setSelectedShapePath: (path: string) => void;
   updateSelectedShapeColor: (color: RgbaColor) => void;
+  updateFramerate: (framerate: number) => void;
 }
 
 interface AnimationProviderProps {
@@ -25,6 +26,7 @@ const AnimationContext = createContext<AnimationContext>({
   selectedShapePath: null,
   setSelectedShapePath: () => null,
   updateSelectedShapeColor: () => null,
+  updateFramerate: () => null,
 });
 
 const animationStorage = createStorageValue<Animation>("animationJson", null);
@@ -56,6 +58,12 @@ export const AnimationProvider = ({ children }: AnimationProviderProps) => {
     }
   };
 
+  const handleUpdateFramerate = (framerate: number) => {
+    if (animationJson) {
+      setAnimationJson(updateFramerate(animationJson, framerate));
+    }
+  };
+
   return (
     <AnimationContext.Provider
       value={{
@@ -63,6 +71,7 @@ export const AnimationProvider = ({ children }: AnimationProviderProps) => {
         animationJson,
         setAnimationJson: handleSetAnimationJson,
         updateSelectedShapeColor: handleUpdateSelectedShapeColor,
+        updateFramerate: handleUpdateFramerate,
         selectedShapePath,
         setSelectedShapePath,
       }}
