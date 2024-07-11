@@ -14,7 +14,7 @@ import { Label } from "./ui/Label";
 import { getFramerate, getSelectedShape, RgbaColor } from "@/lib/animation";
 import { Loading } from "./ui/Loading";
 
-export const EditShapeSidebar = () => {
+export const EditSidebar = () => {
   const {
     animationJson,
     selectedShapePath,
