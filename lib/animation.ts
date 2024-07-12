@@ -137,6 +137,18 @@ export const getFramerate = (animation: Animation) => {
   return animation.fr;
 };
 
+export const getDimensions = (animation: Animation) => {
+  return { width: animation.w, height: animation.h };
+};
+
+export const updateDimensions = (
+  animation: Animation,
+  width: number,
+  height: number,
+) => {
+  return { ...animation, w: width, h: height };
+};
+
 export const updateFramerate = (animation: Animation, framerate: number) => {
   return { ...animation, fr: framerate };
 };

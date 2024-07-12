@@ -2,7 +2,12 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { Animation } from "@lottie-animation-community/lottie-types";
-import { RgbaColor, updateFramerate, updateShapeColor } from "../animation";
+import {
+  RgbaColor,
+  updateDimensions,
+  updateFramerate,
+  updateShapeColor,
+} from "../animation";
 import { createStorageValue } from "../storage";
 
 interface AnimationContext {
@@ -13,6 +18,7 @@ interface AnimationContext {
   setSelectedShapePath: (path: string) => void;
   updateSelectedShapeColor: (color: RgbaColor) => void;
   updateFramerate: (framerate: number) => void;
+  updateDimensions: (width: number, height: number) => void;
 }
 
 interface AnimationProviderProps {
@@ -27,6 +33,7 @@ const AnimationContext = createContext<AnimationContext>({
   setSelectedShapePath: () => null,
   updateSelectedShapeColor: () => null,
   updateFramerate: () => null,
+  updateDimensions: () => null,
 });
 
 const animationStorage = createStorageValue<Animation>("animationJson", null);
@@ -64,6 +71,12 @@ export const AnimationProvider = ({ children }: AnimationProviderProps) => {
     }
   };
 
+  const handleUpdateDimensions = (width: number, height: number) => {
+    if (animationJson) {
+      setAnimationJson(updateDimensions(animationJson, width, height));
+    }
+  };
+
   return (
     <AnimationContext.Provider
       value={{
@@ -72,6 +85,7 @@ export const AnimationProvider = ({ children }: AnimationProviderProps) => {
         setAnimationJson: handleSetAnimationJson,
         updateSelectedShapeColor: handleUpdateSelectedShapeColor,
         updateFramerate: handleUpdateFramerate,
+        updateDimensions: handleUpdateDimensions,
         selectedShapePath,
         setSelectedShapePath,
       }}

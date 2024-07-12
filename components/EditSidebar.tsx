@@ -11,7 +11,12 @@ import { SidebarItem } from "./SidebarItem";
 import { ColorIcon } from "./ui/ColorIcon";
 import { Input } from "./ui/Input";
 import { Label } from "./ui/Label";
-import { getFramerate, getSelectedShape, RgbaColor } from "@/lib/animation";
+import {
+  getDimensions,
+  getFramerate,
+  getSelectedShape,
+  RgbaColor,
+} from "@/lib/animation";
 import { Loading } from "./ui/Loading";
 
 export const EditSidebar = () => {
@@ -21,6 +26,7 @@ export const EditSidebar = () => {
     updateSelectedShapeColor,
     updateFramerate,
     isAnimationLoading,
+    updateDimensions,
   } = useAnimation();
 
   const selectedShape =
@@ -30,6 +36,9 @@ export const EditSidebar = () => {
 
   const framerate = (animationJson && getFramerate(animationJson)) || 0;
 
+  const { width = 0, height = 0 } =
+    (animationJson && getDimensions(animationJson)) || {};
+
   const handleColorChange = (color: RgbaColor) => {
     updateSelectedShapeColor(color);
   };
@@ -37,6 +46,16 @@ export const EditSidebar = () => {
   const handleFramerateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newFramerate = parseInt(e.target.value, 10);
     updateFramerate(newFramerate);
+  };
+
+  const handleWidthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newWidth = parseInt(e.target.value, 10);
+    updateDimensions(newWidth, height);
+  };
+
+  const handleHeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newHeight = parseInt(e.target.value, 10);
+    updateDimensions(width, newHeight);
   };
 
   return (
@@ -69,6 +88,26 @@ export const EditSidebar = () => {
             <h3 className="text-lg font-medium">Global Settings</h3>
           </div>
           <Loading isLoading={isAnimationLoading} className="h-8">
+            <div className="flex items-center gap-2">
+              <Label htmlFor="framerate">Width</Label>
+              <Input
+                id="width"
+                type="number"
+                onChange={handleWidthChange}
+                value={width}
+                className="w-20"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <Label htmlFor="framerate">Height</Label>
+              <Input
+                id="height"
+                type="number"
+                onChange={handleHeightChange}
+                value={height}
+                className="w-20"
+              />
+            </div>
             <div className="flex items-center gap-2">
               <Label htmlFor="framerate">Framerate</Label>
               <Input
