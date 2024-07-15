@@ -14,6 +14,7 @@ interface AnimationContext {
   isAnimationLoading: boolean;
   animationJson: Animation | null;
   setAnimationJson: (animationJson: Animation) => void;
+  removeAnimationJson: () => void;
   selectedShapePath: string | null;
   setSelectedShapePath: (path: string) => void;
   updateSelectedShapeColor: (color: RgbaColor) => void;
@@ -29,6 +30,7 @@ const AnimationContext = createContext<AnimationContext>({
   isAnimationLoading: true,
   animationJson: null,
   setAnimationJson: () => null,
+  removeAnimationJson: () => null,
   selectedShapePath: null,
   setSelectedShapePath: () => null,
   updateSelectedShapeColor: () => null,
@@ -57,6 +59,11 @@ export const AnimationProvider = ({ children }: AnimationProviderProps) => {
     setAnimationJson(animationJson);
   };
 
+  const handleRemoveAnimationJson = () => {
+    animationStorage.remove();
+    setAnimationJson(null);
+  };
+
   const handleUpdateSelectedShapeColor = (color: RgbaColor) => {
     if (animationJson) {
       setAnimationJson(
@@ -83,6 +90,7 @@ export const AnimationProvider = ({ children }: AnimationProviderProps) => {
         isAnimationLoading,
         animationJson,
         setAnimationJson: handleSetAnimationJson,
+        removeAnimationJson: handleRemoveAnimationJson,
         updateSelectedShapeColor: handleUpdateSelectedShapeColor,
         updateFramerate: handleUpdateFramerate,
         updateDimensions: handleUpdateDimensions,
