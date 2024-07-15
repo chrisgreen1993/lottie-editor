@@ -9,6 +9,8 @@ This is a simple [Lottie animation](https://airbnb.io/lottie/#/) editor.
 - Edit shape colours, animation dimensions and framerate.
 - Preview changes in real time.
 
+![editor screenshot](./screenshot.png)
+
 ## Development
 
 1. Clone the repository: `git clone https://github.com/chris/lottie-editor.git`
