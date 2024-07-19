@@ -2,6 +2,8 @@
 
 This is a simple [Lottie animation](https://airbnb.io/lottie/#/) editor.
 
+[Try it here](https://lottie-editor-sigma.vercel.app/)
+
 ## Features
 
 - Import and export Lottie JSON files.
