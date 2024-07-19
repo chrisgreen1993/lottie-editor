@@ -10,6 +10,8 @@ const LottiePlayer = dynamic(
   { ssr: false },
 );
 
+const EXAMPLE_ANIMATION_URL = "/example-animation.json";
+
 export const MainCanvas = () => {
   const { animationJson, isAnimationLoading, setAnimationJson } =
     useAnimation();
@@ -25,16 +27,31 @@ export const MainCanvas = () => {
     }
   };
 
+  const handleTryAnimationClick = async () => {
+    const animationJson = await fetch(EXAMPLE_ANIMATION_URL).then((res) =>
+      res.json(),
+    );
+    setAnimationJson(animationJson);
+  };
+
   return (
     <div className="flex-1 p-4">
       <div className="flex h-full flex-col">
         <div className="mt-4 flex-1">
-          <div className="flex h-full items-center justify-center">
+          <div className="flex h-full items-center justify-center flex-col">
             <Loading isLoading={isAnimationLoading} className="w-full h-full">
               {animationJson ? (
                 <LottiePlayer src={animationJson} />
               ) : (
-                <FileUpload onUpload={handleUpload} />
+                <>
+                  <FileUpload onUpload={handleUpload} />
+                  <button
+                    className="mt-4 text-sm text-muted-foreground hover:underline"
+                    onClick={handleTryAnimationClick}
+                  >
+                    or try an example animation
+                  </button>
+                </>
               )}
             </Loading>
           </div>
