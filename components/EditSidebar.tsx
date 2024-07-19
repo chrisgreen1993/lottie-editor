@@ -83,43 +83,45 @@ export const EditSidebar = () => {
             </div>
           </div>
         )}
-        <div className="flex flex-col gap-4 mt-auto">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-medium">Global Settings</h3>
+        {(animationJson || isAnimationLoading) && (
+          <div className="flex flex-col gap-4 mt-auto">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-medium">Global Settings</h3>
+            </div>
+            <Loading isLoading={isAnimationLoading} className="h-8">
+              <div className="flex items-center gap-2">
+                <Label htmlFor="framerate">Width</Label>
+                <Input
+                  id="width"
+                  type="number"
+                  onChange={handleWidthChange}
+                  value={width}
+                  className="w-20"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <Label htmlFor="framerate">Height</Label>
+                <Input
+                  id="height"
+                  type="number"
+                  onChange={handleHeightChange}
+                  value={height}
+                  className="w-20"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <Label htmlFor="framerate">Framerate</Label>
+                <Input
+                  id="framerate"
+                  type="number"
+                  onChange={handleFramerateChange}
+                  value={framerate}
+                  className="w-20"
+                />
+              </div>
+            </Loading>
           </div>
-          <Loading isLoading={isAnimationLoading} className="h-8">
-            <div className="flex items-center gap-2">
-              <Label htmlFor="framerate">Width</Label>
-              <Input
-                id="width"
-                type="number"
-                onChange={handleWidthChange}
-                value={width}
-                className="w-20"
-              />
-            </div>
-            <div className="flex items-center gap-2">
-              <Label htmlFor="framerate">Height</Label>
-              <Input
-                id="height"
-                type="number"
-                onChange={handleHeightChange}
-                value={height}
-                className="w-20"
-              />
-            </div>
-            <div className="flex items-center gap-2">
-              <Label htmlFor="framerate">Framerate</Label>
-              <Input
-                id="framerate"
-                type="number"
-                onChange={handleFramerateChange}
-                value={framerate}
-                className="w-20"
-              />
-            </div>
-          </Loading>
-        </div>
+        )}
       </div>
     </div>
   );
