@@ -8,6 +8,9 @@ import {
   updateFramerate,
   updateShapeColor,
   deleteLayer,
+  replaceColorGlobally,
+  setLayerHidden,
+  getLayerHidden,
 } from "../animation";
 import { createStorageValue } from "../storage";
 
@@ -18,10 +21,16 @@ interface AnimationContext {
   removeAnimationJson: () => void;
   selectedShapePath: string | null;
   setSelectedShapePath: (path: string) => void;
+  hoveredShapePaths: string[];
+  setHoveredShapePaths: (paths: string[]) => void;
+  isPlaying: boolean;
+  setIsPlaying: (playing: boolean) => void;
   updateSelectedShapeColor: (color: RgbaColor) => void;
   updateFramerate: (framerate: number) => void;
   updateDimensions: (width: number, height: number) => void;
   deleteLayer: (layerIndex: number) => void;
+  updateColorGlobally: (from: RgbaColor, to: RgbaColor) => void;
+  toggleLayerHidden: (layerPath: string) => void;
 }
 
 interface AnimationProviderProps {
@@ -35,10 +44,16 @@ const AnimationContext = createContext<AnimationContext>({
   removeAnimationJson: () => null,
   selectedShapePath: null,
   setSelectedShapePath: () => null,
+  hoveredShapePaths: [],
+  setHoveredShapePaths: () => null,
+  isPlaying: true,
+  setIsPlaying: () => null,
   updateSelectedShapeColor: () => null,
   updateFramerate: () => null,
   updateDimensions: () => null,
   deleteLayer: () => null,
+  updateColorGlobally: () => null,
+  toggleLayerHidden: () => null,
 });
 
 const animationStorage = createStorageValue<Animation>("animationJson", null);
@@ -48,6 +63,8 @@ export const AnimationProvider = ({ children }: AnimationProviderProps) => {
   const [animationJson, setAnimationJson] = useState<Animation | null>(null);
 
   const [selectedShapePath, setSelectedShapePath] = useState<string>("");
+  const [hoveredShapePaths, setHoveredShapePaths] = useState<string[]>([]);
+  const [isPlaying, setIsPlaying] = useState<boolean>(true);
 
   useEffect(() => {
     if (animationJson) {
@@ -93,6 +110,18 @@ export const AnimationProvider = ({ children }: AnimationProviderProps) => {
     }
   };
 
+  const handleUpdateColorGlobally = (from: RgbaColor, to: RgbaColor) => {
+    if (animationJson) {
+      setAnimationJson(replaceColorGlobally(animationJson, from, to));
+    }
+  };
+
+  const handleToggleLayerHidden = (layerPath: string) => {
+    if (!animationJson) return;
+    const currentHidden = getLayerHidden(animationJson, layerPath);
+    setAnimationJson(setLayerHidden(animationJson, layerPath, !currentHidden));
+  };
+
   return (
     <AnimationContext.Provider
       value={{
@@ -100,10 +129,16 @@ export const AnimationProvider = ({ children }: AnimationProviderProps) => {
         animationJson,
         setAnimationJson: handleSetAnimationJson,
         removeAnimationJson: handleRemoveAnimationJson,
+        hoveredShapePaths,
+        setHoveredShapePaths,
+        isPlaying,
+        setIsPlaying,
         updateSelectedShapeColor: handleUpdateSelectedShapeColor,
         updateFramerate: handleUpdateFramerate,
         updateDimensions: handleUpdateDimensions,
         deleteLayer: handleDeleteLayer,
+        updateColorGlobally: handleUpdateColorGlobally,
+        toggleLayerHidden: handleToggleLayerHidden,
         selectedShapePath,
         setSelectedShapePath,
       }}

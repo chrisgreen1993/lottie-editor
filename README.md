@@ -8,7 +8,10 @@ This is a simple [Lottie animation](https://airbnb.io/lottie/#/) editor.
 
 - Import and export Lottie JSON files.
 - List layers and shapes.
-- Edit shape colours, animation dimensions and framerate.
+- Edit shape colours (via picker or **hex code input**).
+- Adjust animation dimensions and framerate.
+- Toggle between **Unique Colors** and **All Colors** view.
+- Improved UX for easier layer management and editing.
 - Preview changes in real time.
 
 ![editor screenshot](./screenshot.png)

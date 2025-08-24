@@ -37,8 +37,12 @@ export const MainCanvas = () => {
   return (
     <div className="flex-1 p-4">
       <div className="flex h-full flex-col">
-        <div className="mt-4 flex-1">
-          <div className="flex h-full items-center justify-center flex-col">
+        <div className="mt-2 flex-1">
+          <div
+            className={`flex h-full flex-col ${
+              animationJson ? "items-center justify-start" : "items-center justify-center"
+            }`}
+          >
             <Loading isLoading={isAnimationLoading} className="w-full h-full">
               {animationJson ? (
                 <LottiePlayer src={animationJson} />

@@ -25,7 +25,7 @@ export const LayerListSidebar = () => {
             skeleton={<LayerListSkeleton />}
           >
             {layers.map((layer, i) => (
-              <LayerItem key={i} layer={layer} layerIndex={i} />
+              <LayerItem key={i} layer={layer} />
             ))}
           </Loading>
         </div>
