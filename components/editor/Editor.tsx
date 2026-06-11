@@ -6,6 +6,7 @@ import { CanvasStage } from "@/components/editor/CanvasStage";
 import { EmptyState } from "@/components/editor/EmptyState";
 import { Inspector } from "@/components/editor/Inspector";
 import { LayerPanel } from "@/components/editor/LayerPanel";
+import { ResizeHandle } from "@/components/editor/ResizeHandle";
 import { Timeline } from "@/components/editor/Timeline";
 import { Toasts } from "@/components/editor/Toasts";
 import { TopBar } from "@/components/editor/TopBar";
@@ -15,6 +16,27 @@ import { deleteLayer, duplicateLayer } from "@/lib/lottie/ops";
 import { loadSession } from "@/lib/persistence";
 import { playerBridge } from "@/lib/playerBridge";
 import { useEditor } from "@/lib/store";
+
+function PanelDivider({
+  panel,
+  grow,
+}: {
+  panel: "layerPanelW" | "inspectorW";
+  grow: 1 | -1;
+}) {
+  const setPanelSize = useEditor((s) => s.setPanelSize);
+  const startRef = React.useRef(0);
+  return (
+    <ResizeHandle
+      orientation="vertical"
+      className="-mx-0.5"
+      onStart={() => {
+        startRef.current = useEditor.getState().panels[panel];
+      }}
+      onDrag={(dx) => setPanelSize(panel, startRef.current + grow * dx)}
+    />
+  );
+}
 
 function isEditableTarget(target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) return false;
@@ -123,8 +145,20 @@ export function Editor() {
         }
       }
       if (e.key === "Escape") {
-        if (state.selectedKeyframe) state.selectKeyframe(null);
+        if (state.tool !== "select") state.setTool("select");
+        else if (state.selectedKeyframe) state.selectKeyframe(null);
         else state.selectLayer(null);
+        return;
+      }
+      // Tool shortcuts (no modifier).
+      if (!mod && !e.altKey) {
+        const tool = { v: "select", r: "rect", e: "ellipse", s: "star" }[
+          e.key.toLowerCase()
+        ];
+        if (tool) {
+          state.setTool(tool as Parameters<typeof state.setTool>[0]);
+          return;
+        }
       }
     };
     window.addEventListener("keydown", onKeyDown);
@@ -174,7 +208,9 @@ export function Editor() {
         <>
           <div className="flex min-h-0 flex-1">
             <LayerPanel />
+            <PanelDivider panel="layerPanelW" grow={1} />
             <CanvasStage />
+            <PanelDivider panel="inspectorW" grow={-1} />
             <Inspector />
           </div>
           <Timeline />

@@ -68,6 +68,9 @@ function LayerRow({
   const update = useEditor((s) => s.update);
   const [editing, setEditing] = React.useState(false);
   const [nameText, setNameText] = React.useState("");
+  const [dropEdge, setDropEdge] = React.useState<"above" | "below" | null>(
+    null,
+  );
 
   const name = layerName(layer, index);
   const hidden = layer.hd === true;
@@ -83,10 +86,37 @@ function LayerRow({
   return (
     <div
       className={cn(
-        "group flex h-8 cursor-pointer select-none items-center gap-1.5 border-b border-border/50 px-2 text-xs transition-colors",
+        "group relative flex h-8 cursor-pointer select-none items-center gap-1.5 border-b border-border/50 px-2 text-xs transition-colors",
         selected ? "bg-primary/15 text-foreground" : "hover:bg-accent/60",
         hidden && "opacity-50",
+        dropEdge === "above" && "shadow-[inset_0_2px_0_hsl(var(--primary))]",
+        dropEdge === "below" && "shadow-[inset_0_-2px_0_hsl(var(--primary))]",
       )}
+      draggable={!editing}
+      onDragStart={(e) => {
+        e.dataTransfer.setData("application/x-layer-index", String(index));
+        e.dataTransfer.effectAllowed = "move";
+      }}
+      onDragOver={(e) => {
+        if (!e.dataTransfer.types.includes("application/x-layer-index")) return;
+        e.preventDefault();
+        const rect = e.currentTarget.getBoundingClientRect();
+        setDropEdge(e.clientY < rect.top + rect.height / 2 ? "above" : "below");
+      }}
+      onDragLeave={() => setDropEdge(null)}
+      onDrop={(e) => {
+        e.preventDefault();
+        const from = Number(
+          e.dataTransfer.getData("application/x-layer-index"),
+        );
+        const edge = dropEdge;
+        setDropEdge(null);
+        if (!Number.isInteger(from) || from === index) return;
+        let to = edge === "below" ? index + 1 : index;
+        if (from < to) to -= 1; // account for the removal shifting indices
+        update((draft) => moveLayer(draft, from, to));
+        selectLayer(to);
+      }}
       onClick={() => selectLayer(selected ? null : index)}
       onDoubleClick={() => {
         setNameText(name);
@@ -183,10 +213,14 @@ function LayerRow({
 
 export function LayerPanel() {
   const doc = useEditor((s) => s.doc);
+  const width = useEditor((s) => s.panels.layerPanelW);
   if (!doc) return null;
 
   return (
-    <aside className="flex w-60 shrink-0 flex-col border-r border-border bg-card">
+    <aside
+      className="flex shrink-0 flex-col border-r border-border bg-card"
+      style={{ width }}
+    >
       <div className="flex h-9 shrink-0 items-center gap-2 border-b border-border px-3">
         <Layers size={13} className="text-muted-foreground" />
         <span className="text-xs font-semibold">Layers</span>
@@ -197,7 +231,7 @@ export function LayerPanel() {
       <div className="min-h-0 flex-1 overflow-y-auto">
         {doc.layers.length === 0 ? (
           <p className="p-4 text-center text-xs text-muted-foreground">
-            No layers
+            No layers yet — draw something with the shape tools on the canvas.
           </p>
         ) : (
           doc.layers.map((layer, i) => (

@@ -354,10 +354,14 @@ function LayerSettings({ index }: { index: number }) {
 export function Inspector() {
   const doc = useEditor((s) => s.doc);
   const selectedLayer = useEditor((s) => s.selectedLayer);
+  const width = useEditor((s) => s.panels.inspectorW);
   if (!doc) return null;
 
   return (
-    <aside className="flex w-72 shrink-0 flex-col border-l border-border bg-card">
+    <aside
+      className="flex shrink-0 flex-col border-l border-border bg-card"
+      style={{ width }}
+    >
       <div className="flex h-9 shrink-0 items-center gap-2 border-b border-border px-3">
         <SlidersHorizontal size={13} className="text-muted-foreground" />
         <span className="text-xs font-semibold">

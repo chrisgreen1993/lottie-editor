@@ -1,14 +1,30 @@
 "use client";
 
 import lottie, { type AnimationItem } from "lottie-web";
-import { Maximize, Minus, Plus } from "lucide-react";
+import {
+  Circle,
+  Maximize,
+  Minus,
+  MousePointer2,
+  Plus,
+  Square,
+  Star,
+} from "lucide-react";
 import * as React from "react";
 
 import { CanvasOverlay } from "@/components/editor/CanvasOverlay";
 import { IconButton } from "@/components/editor/fields";
+import { addShapeLayer, type ShapeKind } from "@/lib/lottie/create";
 import { playerBridge } from "@/lib/playerBridge";
-import { useEditor, type CanvasBackground } from "@/lib/store";
+import { useEditor, type CanvasBackground, type CanvasTool } from "@/lib/store";
 import { cn } from "@/lib/utils";
+
+const TOOLS: { id: CanvasTool; label: string; icon: React.ReactNode }[] = [
+  { id: "select", label: "Select (V)", icon: <MousePointer2 size={14} /> },
+  { id: "rect", label: "Rectangle (R)", icon: <Square size={14} /> },
+  { id: "ellipse", label: "Ellipse (E)", icon: <Circle size={14} /> },
+  { id: "star", label: "Star (S)", icon: <Star size={14} /> },
+];
 
 const BG_OPTIONS: {
   value: CanvasBackground;
@@ -37,6 +53,16 @@ export function CanvasStage() {
   const setCurrentFrame = useEditor((s) => s.setCurrentFrame);
   const setPlaying = useEditor((s) => s.setPlaying);
   const selectLayer = useEditor((s) => s.selectLayer);
+  const tool = useEditor((s) => s.tool);
+  const setTool = useEditor((s) => s.setTool);
+  const update = useEditor((s) => s.update);
+  const [drawRect, setDrawRect] = React.useState<{
+    x0: number;
+    y0: number;
+    x1: number;
+    y1: number;
+  } | null>(null);
+  const justDrewRef = React.useRef(false);
 
   const containerRef = React.useRef<HTMLDivElement>(null);
   const stageRef = React.useRef<HTMLDivElement>(null);
@@ -145,8 +171,61 @@ export function CanvasStage() {
     setZoom(Number(next.toFixed(3)));
   };
 
+  // Drag-to-draw a new shape layer when a shape tool is active.
+  const onDrawStart = (e: React.PointerEvent) => {
+    if (tool === "select") return;
+    e.preventDefault();
+    e.stopPropagation();
+    const wrapper = e.currentTarget as HTMLElement;
+    const rect = wrapper.getBoundingClientRect();
+    const start = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    setDrawRect({ x0: start.x, y0: start.y, x1: start.x, y1: start.y });
+    try {
+      wrapper.setPointerCapture(e.pointerId);
+    } catch {
+      // Synthetic or already-released pointers can lack an active id.
+    }
+
+    const kind = tool as ShapeKind;
+    const onMove = (ev: PointerEvent) => {
+      setDrawRect({
+        x0: start.x,
+        y0: start.y,
+        x1: ev.clientX - rect.left,
+        y1: ev.clientY - rect.top,
+      });
+    };
+    const onUp = (ev: PointerEvent) => {
+      wrapper.removeEventListener("pointermove", onMove);
+      wrapper.removeEventListener("pointerup", onUp);
+      setDrawRect(null);
+      const end = { x: ev.clientX - rect.left, y: ev.clientY - rect.top };
+      let w = Math.abs(end.x - start.x) / scale;
+      let h = Math.abs(end.y - start.y) / scale;
+      const cx = (start.x + end.x) / 2 / scale;
+      const cy = (start.y + end.y) / 2 / scale;
+      if (w < 4 && h < 4) {
+        // A click without a drag drops a default-sized shape.
+        w = 160;
+        h = 160;
+      }
+      update((draft) => addShapeLayer(draft, kind, { cx, cy, w, h }));
+      setTool("select");
+      selectLayer(0);
+      justDrewRef.current = true;
+    };
+    wrapper.addEventListener("pointermove", onMove);
+    wrapper.addEventListener("pointerup", onUp);
+  };
+
   // Map a click on the rendered SVG back to the layer that drew it.
   const onStageClick = (e: React.MouseEvent) => {
+    if (tool !== "select") return;
+    if (justDrewRef.current) {
+      // The click that ends a draw gesture must not re-run hit-testing.
+      justDrewRef.current = false;
+      return;
+    }
     const target = e.target as Element;
     if (target.closest("[data-canvas-overlay]")) return;
     const anim = playerBridge.get() as unknown as {
@@ -195,8 +274,10 @@ export function CanvasStage() {
               width: doc.w * scale,
               height: doc.h * scale,
               ...stageBgStyle,
+              cursor: tool === "select" ? undefined : "crosshair",
             }}
             onClick={onStageClick}
+            onPointerDown={onDrawStart}
           >
             <div
               ref={stageRef}
@@ -207,8 +288,37 @@ export function CanvasStage() {
                 transformOrigin: "top left",
               }}
             />
-            <CanvasOverlay scale={scale} />
+            {tool === "select" && <CanvasOverlay scale={scale} />}
+            {drawRect && (
+              <div
+                className={cn(
+                  "pointer-events-none absolute border border-dashed border-primary bg-primary/10",
+                  tool === "ellipse" && "rounded-full",
+                )}
+                style={{
+                  left: Math.min(drawRect.x0, drawRect.x1),
+                  top: Math.min(drawRect.y0, drawRect.y1),
+                  width: Math.abs(drawRect.x1 - drawRect.x0),
+                  height: Math.abs(drawRect.y1 - drawRect.y0),
+                }}
+              />
+            )}
           </div>
+        </div>
+      </div>
+
+      <div className="pointer-events-none absolute inset-x-0 top-3 flex justify-center">
+        <div className="pointer-events-auto flex items-center gap-0.5 rounded-lg border border-border bg-card/90 px-1.5 py-1 shadow-lg backdrop-blur">
+          {TOOLS.map((t) => (
+            <IconButton
+              key={t.id}
+              label={t.label}
+              active={tool === t.id}
+              onClick={() => setTool(t.id)}
+            >
+              {t.icon}
+            </IconButton>
+          ))}
         </div>
       </div>
 

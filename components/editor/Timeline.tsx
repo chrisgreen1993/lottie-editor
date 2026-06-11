@@ -17,6 +17,7 @@ import * as React from "react";
 
 import { EasingEditor } from "@/components/editor/EasingEditor";
 import { IconButton } from "@/components/editor/fields";
+import { ResizeHandle } from "@/components/editor/ResizeHandle";
 import {
   Popover,
   PopoverContent,
@@ -520,6 +521,9 @@ export function Timeline() {
   const setCurrentFrame = useEditor((s) => s.setCurrentFrame);
   const selectedLayer = useEditor((s) => s.selectedLayer);
   const selectLayer = useEditor((s) => s.selectLayer);
+  const height = useEditor((s) => s.panels.timelineH);
+  const setPanelSize = useEditor((s) => s.setPanelSize);
+  const startHeightRef = React.useRef(height);
 
   const trackAreaRef = React.useRef<HTMLDivElement>(null);
   const [trackWidth, setTrackWidth] = React.useState(0);
@@ -534,12 +538,16 @@ export function Timeline() {
     return () => observer.disconnect();
   }, [doc]);
 
+  // Property tracks are a deep walk over the layer; only pay for the
+  // layers that are actually expanded.
   const layerTracks = React.useMemo(() => {
-    if (!doc) return new Map<number, PropTrack[]>();
     const map = new Map<number, PropTrack[]>();
-    doc.layers.forEach((_, i) => map.set(i, collectTracks(doc, i)));
+    if (!doc) return map;
+    expanded.forEach((i) => {
+      if (doc.layers[i]) map.set(i, collectTracks(doc, i));
+    });
     return map;
-  }, [doc]);
+  }, [doc, expanded]);
 
   if (!doc) return null;
 
@@ -603,7 +611,20 @@ export function Timeline() {
   );
 
   return (
-    <div className="flex h-64 shrink-0 flex-col border-t border-border bg-card">
+    <div
+      className="relative flex shrink-0 flex-col border-t border-border bg-card"
+      style={{ height }}
+    >
+      <ResizeHandle
+        orientation="horizontal"
+        className="absolute inset-x-0 -top-0.5"
+        onStart={() => {
+          startHeightRef.current = useEditor.getState().panels.timelineH;
+        }}
+        onDrag={(_dx, dy) =>
+          setPanelSize("timelineH", startHeightRef.current - dy)
+        }
+      />
       <TransportBar />
       <div className="relative flex min-h-0 flex-1 flex-col">
         {/* Ruler */}
@@ -647,10 +668,7 @@ export function Timeline() {
                   >
                     <button
                       type="button"
-                      className={cn(
-                        "flex h-full w-5 shrink-0 items-center justify-center text-muted-foreground hover:text-foreground",
-                        tracks.length === 0 && "invisible",
-                      )}
+                      className="flex h-full w-5 shrink-0 items-center justify-center text-muted-foreground hover:text-foreground"
                       title={
                         isExpanded ? "Collapse properties" : "Expand properties"
                       }
@@ -680,13 +698,19 @@ export function Timeline() {
                   </div>
                 </div>
                 {isExpanded &&
-                  tracks.map((track) => (
-                    <PropTrackRow
-                      key={track.id}
-                      track={track}
-                      layerIndex={i}
-                      geom={geom}
-                    />
+                  (tracks.length > 0 ? (
+                    tracks.map((track) => (
+                      <PropTrackRow
+                        key={track.id}
+                        track={track}
+                        layerIndex={i}
+                        geom={geom}
+                      />
+                    ))
+                  ) : (
+                    <div className="flex h-6 items-center border-b border-border/30 bg-card/60 pl-7 text-[10px] text-muted-foreground">
+                      No animated properties
+                    </div>
                   ))}
               </React.Fragment>
             );

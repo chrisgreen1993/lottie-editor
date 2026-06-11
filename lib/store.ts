@@ -9,6 +9,41 @@ const COALESCE_WINDOW_MS = 900;
 
 export type CanvasBackground = "checker" | "dark" | "light" | "doc";
 export type Zoom = number | "fit";
+export type CanvasTool = "select" | "rect" | "ellipse" | "star";
+
+export interface PanelSizes {
+  layerPanelW: number;
+  inspectorW: number;
+  timelineH: number;
+}
+
+const UI_KEY = "lottie-editor:ui";
+const PANEL_LIMITS: Record<keyof PanelSizes, [number, number]> = {
+  layerPanelW: [180, 420],
+  inspectorW: [240, 460],
+  timelineH: [160, 520],
+};
+
+function loadPanelSizes(): PanelSizes {
+  const defaults: PanelSizes = {
+    layerPanelW: 240,
+    inspectorW: 288,
+    timelineH: 256,
+  };
+  if (typeof window === "undefined") return defaults;
+  try {
+    const saved = JSON.parse(localStorage.getItem(UI_KEY) ?? "{}");
+    for (const key of Object.keys(defaults) as (keyof PanelSizes)[]) {
+      const [min, max] = PANEL_LIMITS[key];
+      if (typeof saved[key] === "number") {
+        defaults[key] = Math.max(min, Math.min(max, saved[key]));
+      }
+    }
+  } catch {
+    // corrupted UI state — fall back to defaults
+  }
+  return defaults;
+}
 
 export interface Toast {
   id: number;
@@ -48,6 +83,8 @@ interface EditorState {
 
   zoom: Zoom;
   canvasBg: CanvasBackground;
+  tool: CanvasTool;
+  panels: PanelSizes;
 
   toasts: Toast[];
 
@@ -67,6 +104,8 @@ interface EditorState {
 
   setZoom: (zoom: Zoom) => void;
   setCanvasBg: (bg: CanvasBackground) => void;
+  setTool: (tool: CanvasTool) => void;
+  setPanelSize: (key: keyof PanelSizes, px: number) => void;
 
   toast: (message: string, kind?: Toast["kind"]) => void;
   dismissToast: (id: number) => void;
@@ -98,6 +137,8 @@ export const useEditor = create<EditorState>((set, get) => ({
 
   zoom: "fit",
   canvasBg: "checker",
+  tool: "select",
+  panels: loadPanelSizes(),
 
   toasts: [],
 
@@ -218,6 +259,21 @@ export const useEditor = create<EditorState>((set, get) => ({
 
   setZoom: (zoom) => set({ zoom }),
   setCanvasBg: (canvasBg) => set({ canvasBg }),
+  setTool: (tool) => set({ tool }),
+
+  setPanelSize: (key, px) => {
+    const [min, max] = PANEL_LIMITS[key];
+    const panels = {
+      ...get().panels,
+      [key]: Math.round(Math.max(min, Math.min(max, px))),
+    };
+    set({ panels });
+    try {
+      localStorage.setItem(UI_KEY, JSON.stringify(panels));
+    } catch {
+      // best-effort persistence
+    }
+  },
 
   toast: (message, kind = "info") => {
     const id = ++toastId;

@@ -2,6 +2,7 @@
 
 import {
   Clapperboard,
+  FilePlus2,
   FolderOpen,
   Globe,
   Sparkles,
@@ -9,6 +10,7 @@ import {
 } from "lucide-react";
 import * as React from "react";
 
+import { blankDoc } from "@/lib/lottie/create";
 import { parseLottie } from "@/lib/lottie/model";
 import { useEditor } from "@/lib/store";
 import { cn } from "@/lib/utils";
@@ -116,6 +118,14 @@ export function EmptyState({
           >
             <FolderOpen size={14} />
             Browse files
+          </button>
+          <button
+            type="button"
+            onClick={() => loadDoc(blankDoc(), "untitled")}
+            className="inline-flex h-9 flex-1 items-center justify-center gap-2 rounded-md bg-secondary px-3 text-xs font-medium text-secondary-foreground transition-colors hover:bg-secondary/80"
+          >
+            <FilePlus2 size={14} />
+            Start blank
           </button>
         </div>
 
