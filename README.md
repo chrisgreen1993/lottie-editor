@@ -11,6 +11,7 @@ A browser-based [Lottie animation](https://lottie.github.io/) editor — inspect
 
 **Edit**
 
+- Canvas manipulation: click a layer on the canvas to select it, drag to move, corner handles to scale, rotate handle (⇧ snaps to 15°) — all keyframe-aware with After Effects-style auto-keying at the playhead
 - Layer panel: select, rename (double-click), show/hide, reorder, duplicate and delete layers
 - Inspector: document size, frame rate and duration; per-layer transform (position, scale, rotation, opacity, anchor) for non-keyframed properties
 - Colors: edit fills, strokes, gradient stops and solid layers — including layers nested inside precomps; the document **palette** recolors every use of a color at once

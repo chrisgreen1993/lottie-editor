@@ -4,6 +4,7 @@ import lottie, { type AnimationItem } from "lottie-web";
 import { Maximize, Minus, Plus } from "lucide-react";
 import * as React from "react";
 
+import { CanvasOverlay } from "@/components/editor/CanvasOverlay";
 import { IconButton } from "@/components/editor/fields";
 import { playerBridge } from "@/lib/playerBridge";
 import { useEditor, type CanvasBackground } from "@/lib/store";
@@ -35,6 +36,7 @@ export function CanvasStage() {
   const setCanvasBg = useEditor((s) => s.setCanvasBg);
   const setCurrentFrame = useEditor((s) => s.setCurrentFrame);
   const setPlaying = useEditor((s) => s.setPlaying);
+  const selectLayer = useEditor((s) => s.selectLayer);
 
   const containerRef = React.useRef<HTMLDivElement>(null);
   const stageRef = React.useRef<HTMLDivElement>(null);
@@ -143,6 +145,26 @@ export function CanvasStage() {
     setZoom(Number(next.toFixed(3)));
   };
 
+  // Map a click on the rendered SVG back to the layer that drew it.
+  const onStageClick = (e: React.MouseEvent) => {
+    const target = e.target as Element;
+    if (target.closest("[data-canvas-overlay]")) return;
+    const anim = playerBridge.get() as unknown as {
+      renderer?: {
+        elements?: Array<{ layerElement?: SVGGElement } | undefined>;
+      };
+    } | null;
+    const elements = anim?.renderer?.elements ?? [];
+    for (let i = 0; i < elements.length; i++) {
+      const node = elements[i]?.layerElement;
+      if (node && (node === target || node.contains(target))) {
+        selectLayer(i);
+        return;
+      }
+    }
+    selectLayer(null);
+  };
+
   const stageBgStyle: React.CSSProperties =
     canvasBg === "doc"
       ? { backgroundColor: doc.bg || "#ffffff" }
@@ -174,6 +196,7 @@ export function CanvasStage() {
               height: doc.h * scale,
               ...stageBgStyle,
             }}
+            onClick={onStageClick}
           >
             <div
               ref={stageRef}
@@ -184,6 +207,7 @@ export function CanvasStage() {
                 transformOrigin: "top left",
               }}
             />
+            <CanvasOverlay scale={scale} />
           </div>
         </div>
       </div>
