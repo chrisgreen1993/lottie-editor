@@ -182,6 +182,7 @@ function TransformPropRow({
   const doc = useEditor((s) => s.doc)!;
   const update = useEditor((s) => s.update);
   const frame = useEditor((s) => Math.round(s.currentFrame));
+  const animateMode = useEditor((s) => s.editorMode === "animate");
 
   const layer = doc.layers[layerIndex];
   const ks = (layer.ks ?? {}) as Record<string, AnimProp>;
@@ -275,7 +276,9 @@ function TransformPropRow({
           onCommit={(v) => commit(idx, v)}
         />
       ))}
-      {!split && <KeyframeToggle state={toggleState} onClick={onToggle} />}
+      {!split && animateMode && (
+        <KeyframeToggle state={toggleState} onClick={onToggle} />
+      )}
     </div>
   );
 }
@@ -284,6 +287,7 @@ function LayerSettings({ index }: { index: number }) {
   const doc = useEditor((s) => s.doc)!;
   const update = useEditor((s) => s.update);
   const frame = useEditor((s) => Math.round(s.currentFrame));
+  const animateMode = useEditor((s) => s.editorMode === "animate");
   const layer = doc.layers[index];
 
   const colors = React.useMemo(
@@ -311,10 +315,12 @@ function LayerSettings({ index }: { index: number }) {
         {TRANSFORM_SPECS.map((spec) => (
           <TransformPropRow key={spec.key} spec={spec} layerIndex={index} />
         ))}
-        <p className="mt-2 text-[10px] text-muted-foreground">
-          Keyframed values follow the playhead. Park it on a ◆ to edit that
-          keyframe, or use the diamond buttons to add and remove keys.
-        </p>
+        {animateMode && (
+          <p className="mt-2 text-[10px] text-muted-foreground">
+            Keyframed values follow the playhead. Park it on a ◆ to edit that
+            keyframe, or use the diamond buttons to add and remove keys.
+          </p>
+        )}
       </Section>
 
       {colors.length > 0 && (

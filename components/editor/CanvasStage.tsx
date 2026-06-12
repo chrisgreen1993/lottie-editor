@@ -102,6 +102,7 @@ export function CanvasStage() {
   const justDrewRef = React.useRef(false);
   const pathEdit = useEditor((s) => s.pathEdit);
   const setPathEdit = useEditor((s) => s.setPathEdit);
+  const editorMode = useEditor((s) => s.editorMode);
   const [penPoints, setPenPoints] = React.useState<PenVertex[]>([]);
   const [penCursor, setPenCursor] = React.useState<[number, number] | null>(
     null,
@@ -524,26 +525,30 @@ export function CanvasStage() {
         </div>
       </div>
 
-      <div className="pointer-events-none absolute inset-x-0 top-3 flex flex-col items-center gap-1.5">
-        <div className="pointer-events-auto flex items-center gap-0.5 rounded-lg border border-border bg-card/90 px-1.5 py-1 shadow-lg backdrop-blur">
-          {TOOLS.map((t) => (
-            <IconButton
-              key={t.id}
-              label={t.label}
-              active={tool === t.id}
-              onClick={() => setTool(t.id)}
-            >
-              {t.icon}
-            </IconButton>
-          ))}
+      {editorMode === "design" && (
+        <div className="pointer-events-none absolute inset-y-0 left-3 flex items-center">
+          <div className="pointer-events-auto flex flex-col gap-0.5 rounded-lg border border-border bg-card/90 px-1 py-1.5 shadow-lg backdrop-blur">
+            {TOOLS.map((t) => (
+              <IconButton
+                key={t.id}
+                label={t.label}
+                active={tool === t.id}
+                onClick={() => setTool(t.id)}
+              >
+                {t.icon}
+              </IconButton>
+            ))}
+          </div>
         </div>
-        {tool === "pen" && (
+      )}
+      {tool === "pen" && (
+        <div className="pointer-events-none absolute inset-x-0 top-3 flex justify-center">
           <div className="rounded-md border border-border bg-card/90 px-2 py-0.5 text-[10px] text-muted-foreground shadow backdrop-blur">
             Click to add points · drag for curves · click the first point to
             close · Enter finishes open · Esc cancels
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       <div className="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center">
         <div className="pointer-events-auto flex items-center gap-1 rounded-lg border border-border bg-card/90 px-2 py-1 shadow-lg backdrop-blur">

@@ -10,6 +10,7 @@ const COALESCE_WINDOW_MS = 900;
 export type CanvasBackground = "checker" | "dark" | "light" | "doc";
 export type Zoom = number | "fit";
 export type CanvasTool = "select" | "rect" | "ellipse" | "star" | "pen";
+export type EditorMode = "design" | "animate";
 
 export interface PanelSizes {
   layerPanelW: number;
@@ -84,6 +85,8 @@ interface EditorState {
   graphMode: boolean;
   /** Layer whose path vertices are being edited on canvas, or null. */
   pathEdit: number | null;
+  /** Design: canvas-first, no timeline. Animate: timeline + keyframes. */
+  editorMode: EditorMode;
 
   past: LottieDoc[];
   future: LottieDoc[];
@@ -114,6 +117,7 @@ interface EditorState {
   setSnapGuide: (frame: number | null) => void;
   setGraphMode: (on: boolean) => void;
   setPathEdit: (layer: number | null) => void;
+  setEditorMode: (mode: EditorMode) => void;
 
   setPlaying: (playing: boolean) => void;
   setCurrentFrame: (frame: number) => void;
@@ -145,6 +149,7 @@ export const useEditor = create<EditorState>((set, get) => ({
   snapGuide: null,
   graphMode: false,
   pathEdit: null,
+  editorMode: "animate",
 
   past: [],
   future: [],
@@ -171,10 +176,13 @@ export const useEditor = create<EditorState>((set, get) => ({
       selectedKeyframes: [],
       graphMode: false,
       pathEdit: null,
+      // A blank composition starts in design mode; real animations open
+      // ready to play.
+      editorMode: doc.layers.length === 0 ? "design" : "animate",
       past: [],
       future: [],
       lastCoalesceKey: null,
-      isPlaying: true,
+      isPlaying: doc.layers.length > 0,
       currentFrame: doc.ip,
       zoom: "fit",
     });
@@ -296,6 +304,17 @@ export const useEditor = create<EditorState>((set, get) => ({
   setSnapGuide: (snapGuide) => set({ snapGuide }),
   setGraphMode: (graphMode) => set({ graphMode }),
   setPathEdit: (pathEdit) => set({ pathEdit }),
+
+  setEditorMode: (editorMode) => {
+    if (get().editorMode === editorMode) return;
+    if (editorMode === "design") {
+      // Design mode is canvas-first: park playback.
+      set({ editorMode, isPlaying: false });
+    } else {
+      // Drawing happens in design mode; animate keeps the select tool.
+      set({ editorMode, tool: "select" });
+    }
+  },
 
   setPlaying: (isPlaying) => set({ isPlaying }),
   setCurrentFrame: (currentFrame) => set({ currentFrame }),

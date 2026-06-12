@@ -18,6 +18,7 @@ A browser-based [Lottie animation](https://lottie.github.io/) editor — inspect
 - Canvas manipulation: click a layer on the canvas to select it, drag to move, corner handles to scale, rotate handle (⇧ snaps to 15°) — all keyframe-aware with After Effects-style auto-keying at the playhead
 - Layer panel: select, rename (double-click), show/hide, drag to reorder, duplicate and delete layers
 - Resizable layout: drag the panel dividers and the timeline edge; sizes persist between sessions
+- **Design / Animate modes** (`Tab`, or the centered switcher in the top bar): Design is canvas-first — no timeline, a vertical tool rail, keyframe-free inspector, playback parked; Animate brings back the timeline, keyframe diamonds and transport with the select tool. Picking a drawing tool from Animate hops to Design automatically; blank documents open in Design
 - Inspector: document size, frame rate and duration; per-layer transform (position, scale, rotation, opacity, anchor) for non-keyframed properties
 - Colors: edit fills, strokes, gradient stops and solid layers — including layers nested inside precomps; the document **palette** recolors every use of a color at once
 - Stroke width editing

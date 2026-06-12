@@ -50,6 +50,7 @@ function isEditableTarget(target: EventTarget | null): boolean {
 
 export function Editor() {
   const doc = useEditor((s) => s.doc);
+  const editorMode = useEditor((s) => s.editorMode);
   const loadDoc = useEditor((s) => s.loadDoc);
   const toast = useEditor((s) => s.toast);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
@@ -104,6 +105,14 @@ export function Editor() {
       }
       if (!state.doc) return;
 
+      if (e.key === "Tab") {
+        // Rive-style: Tab flips between Design and Animate.
+        e.preventDefault();
+        state.setEditorMode(
+          state.editorMode === "design" ? "animate" : "design",
+        );
+        return;
+      }
       if (e.code === "Space") {
         e.preventDefault();
         state.setPlaying(!state.isPlaying);
@@ -153,7 +162,8 @@ export function Editor() {
         else state.selectLayer(null);
         return;
       }
-      // Tool shortcuts (no modifier).
+      // Tool shortcuts (no modifier). Picking a drawing tool from animate
+      // mode hops over to design mode first.
       if (!mod && !e.altKey) {
         const tool = {
           v: "select",
@@ -163,6 +173,9 @@ export function Editor() {
           p: "pen",
         }[e.key.toLowerCase()];
         if (tool) {
+          if (tool !== "select" && state.editorMode === "animate") {
+            state.setEditorMode("design");
+          }
           state.setTool(tool as Parameters<typeof state.setTool>[0]);
           return;
         }
@@ -220,7 +233,7 @@ export function Editor() {
             <PanelDivider panel="inspectorW" grow={-1} />
             <Inspector />
           </div>
-          <Timeline />
+          {editorMode === "animate" && <Timeline />}
         </>
       ) : (
         <EmptyState
