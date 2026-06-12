@@ -24,6 +24,7 @@ A browser-based [Lottie animation](https://lottie.github.io/) editor — inspect
 
 - Frame ruler with scrubbing playhead, play/pause, loop and playback speed
 - Per-layer bars: drag to shift a layer in time, drag the edges to trim in/out points
+- Hold `⇧` while dragging keyframes, layer bars or the playhead to snap to nearby keyframes, layer bounds and the playhead
 - Expandable per-property tracks for every animated property
 - Drag keyframes to retime them, double-click a track to add one, delete from the keyframe toolbar
 - Easing presets (linear, smooth, ease in/out, hold) plus an interactive bezier curve editor per segment

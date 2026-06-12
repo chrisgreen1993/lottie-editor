@@ -269,18 +269,41 @@ function xToFrame(geom: TrackGeometry, x: number): number {
   return geom.ip + (x / geom.width) * (geom.op - geom.ip);
 }
 
+const SNAP_PX = 8;
+
+/** Snap a frame to the nearest target within a pixel-based threshold. */
+function snapFrame(
+  frame: number,
+  targets: number[],
+  geom: TrackGeometry,
+): number {
+  const threshold = (SNAP_PX / geom.width) * (geom.op - geom.ip);
+  let best = frame;
+  let bestDist = threshold;
+  for (const t of targets) {
+    const d = Math.abs(t - frame);
+    if (d < bestDist) {
+      best = t;
+      bestDist = d;
+    }
+  }
+  return best;
+}
+
 function KeyframeDiamond({
   track,
   layerIndex,
   kfIndex,
   t,
   geom,
+  snapTargets,
 }: {
   track: PropTrack;
   layerIndex: number;
   kfIndex: number;
   t: number;
   geom: TrackGeometry;
+  snapTargets: number[];
 }) {
   const update = useEditor((s) => s.update);
   const selectKeyframe = useEditor((s) => s.selectKeyframe);
@@ -304,6 +327,11 @@ function KeyframeDiamond({
     });
     const startX = e.clientX;
     const startT = t;
+    // Snapshot targets at drag start: every other keyframe plus the playhead.
+    const targets = [
+      ...snapTargets.filter((s) => s !== startT),
+      Math.round(useEditor.getState().currentFrame),
+    ];
     const target = e.currentTarget as HTMLElement;
     try {
       target.setPointerCapture(e.pointerId);
@@ -314,11 +342,11 @@ function KeyframeDiamond({
     const onMove = (ev: PointerEvent) => {
       const deltaFrames =
         ((ev.clientX - startX) / geom.width) * (geom.op - geom.ip);
-      update(
-        (draft) =>
-          moveKeyframe(draft, track.path, kfIndex, startT + deltaFrames),
-        { coalesceKey: `kf-move-${track.id}-${kfIndex}` },
-      );
+      let next = startT + deltaFrames;
+      if (ev.shiftKey) next = snapFrame(next, targets, geom);
+      update((draft) => moveKeyframe(draft, track.path, kfIndex, next), {
+        coalesceKey: `kf-move-${track.id}-${kfIndex}`,
+      });
     };
     const onUp = () => {
       target.removeEventListener("pointermove", onMove);
@@ -337,7 +365,7 @@ function KeyframeDiamond({
           : "border-transparent bg-amber-400 hover:scale-125",
       )}
       style={{ left: x }}
-      title={`${track.label} · frame ${Math.round(t)} — drag to retime`}
+      title={`${track.label} · frame ${Math.round(t)} — drag to retime (⇧ snaps to nearby keyframes)`}
       onPointerDown={onPointerDown}
     />
   );
@@ -347,10 +375,12 @@ function PropTrackRow({
   track,
   layerIndex,
   geom,
+  snapTargets,
 }: {
   track: PropTrack;
   layerIndex: number;
   geom: TrackGeometry;
+  snapTargets: number[];
 }) {
   const update = useEditor((s) => s.update);
   const selectKeyframe = useEditor((s) => s.selectKeyframe);
@@ -397,6 +427,7 @@ function PropTrackRow({
             kfIndex={i}
             t={t}
             geom={geom}
+            snapTargets={snapTargets}
           />
         ))}
       </div>
@@ -408,10 +439,12 @@ function LayerTrack({
   layer,
   index,
   geom,
+  snapTargets,
 }: {
   layer: LottieLayer;
   index: number;
   geom: TrackGeometry;
+  snapTargets: number[];
 }) {
   const update = useEditor((s) => s.update);
   const selectLayer = useEditor((s) => s.selectLayer);
@@ -430,6 +463,15 @@ function LayerTrack({
     e.preventDefault();
     const startX = e.clientX;
     const { ip: startIp, op: startOp } = layer;
+    // Snapshot targets at drag start: keyframes and other layers' bounds
+    // (excluding this bar's own edges, which would pin it in place) plus
+    // the playhead.
+    const targets = [
+      ...snapTargets.filter(
+        (s) => s !== Math.round(startIp) && s !== Math.round(startOp),
+      ),
+      Math.round(useEditor.getState().currentFrame),
+    ];
     const target = e.currentTarget as HTMLElement;
     try {
       target.setPointerCapture(e.pointerId);
@@ -440,21 +482,36 @@ function LayerTrack({
     const onMove = (ev: PointerEvent) => {
       const deltaFrames =
         ((ev.clientX - startX) / geom.width) * (geom.op - geom.ip);
+      const snap = (frame: number) =>
+        ev.shiftKey ? snapFrame(frame, targets, geom) : frame;
       update(
         (draft) => {
           if (mode === "move") {
             const span = startOp - startIp;
-            let ip = Math.round(startIp + deltaFrames);
+            let ip = startIp + deltaFrames;
+            if (ev.shiftKey) {
+              // Snap whichever edge lands closer to a target.
+              const byIp = snapFrame(ip, targets, geom);
+              const byOp = snapFrame(ip + span, targets, geom) - span;
+              ip = Math.abs(byOp - ip) < Math.abs(byIp - ip) ? byOp : byIp;
+            }
+            ip = Math.round(ip);
             ip = Math.max(geom.ip - span, Math.min(geom.op, ip));
             setLayerRange(draft, index, ip, ip + span, true);
           } else if (mode === "trim-in") {
             const ip = Math.round(
-              Math.max(geom.ip, Math.min(startOp - 1, startIp + deltaFrames)),
+              Math.max(
+                geom.ip,
+                Math.min(startOp - 1, snap(startIp + deltaFrames)),
+              ),
             );
             setLayerRange(draft, index, ip, startOp);
           } else {
             const op = Math.round(
-              Math.min(geom.op, Math.max(startIp + 1, startOp + deltaFrames)),
+              Math.min(
+                geom.op,
+                Math.max(startIp + 1, snap(startOp + deltaFrames)),
+              ),
             );
             setLayerRange(draft, index, startIp, op);
           }
@@ -549,6 +606,18 @@ export function Timeline() {
     return map;
   }, [doc, expanded]);
 
+  // Shift-drag snap targets: every keyframe and layer bound in the document.
+  const snapTargets = React.useMemo(() => {
+    if (!doc) return [] as number[];
+    const set = new Set<number>();
+    for (const layer of doc.layers) {
+      for (const t of collectKeyframeTimes(layer)) set.add(t);
+      set.add(Math.round(layer.ip));
+      set.add(Math.round(layer.op));
+    }
+    return Array.from(set);
+  }, [doc]);
+
   if (!doc) return null;
 
   const geom: TrackGeometry = {
@@ -567,14 +636,15 @@ export function Timeline() {
     ticks.push(f);
   }
 
-  const scrubTo = (clientX: number) => {
+  const scrubTo = (clientX: number, shift: boolean) => {
     const el = trackAreaRef.current;
     if (!el) return;
     const rect = el.getBoundingClientRect();
-    const frame = Math.max(
+    let frame = Math.max(
       doc.ip,
       Math.min(doc.op, xToFrame(geom, clientX - rect.left)),
     );
+    if (shift) frame = snapFrame(frame, snapTargets, geom);
     setCurrentFrame(frame);
     playerBridge.seek(frame, useEditor.getState().isPlaying);
   };
@@ -586,8 +656,8 @@ export function Timeline() {
     } catch {
       // Synthetic or already-released pointers can lack an active id.
     }
-    scrubTo(e.clientX);
-    const onMove = (ev: PointerEvent) => scrubTo(ev.clientX);
+    scrubTo(e.clientX, e.shiftKey);
+    const onMove = (ev: PointerEvent) => scrubTo(ev.clientX, ev.shiftKey);
     const onUp = () => {
       target.removeEventListener("pointermove", onMove);
       target.removeEventListener("pointerup", onUp);
@@ -694,7 +764,12 @@ export function Timeline() {
                     className="relative min-w-0 flex-1"
                     style={{ width: trackWidth }}
                   >
-                    <LayerTrack layer={layer} index={i} geom={geom} />
+                    <LayerTrack
+                      layer={layer}
+                      index={i}
+                      geom={geom}
+                      snapTargets={snapTargets}
+                    />
                   </div>
                 </div>
                 {isExpanded &&
@@ -705,6 +780,7 @@ export function Timeline() {
                         track={track}
                         layerIndex={i}
                         geom={geom}
+                        snapTargets={snapTargets}
                       />
                     ))
                   ) : (
