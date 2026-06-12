@@ -1,6 +1,7 @@
 import { get as lget, set as lset } from "lodash-es";
 
 import { normalizeComponents, rgbToHex, type RGB } from "./color";
+import { addKeyframe, sampleKeyframes, type Keyframe } from "./keyframes";
 import { layerName, type LottieDoc, type LottieLayer } from "./model";
 
 export type Path = (string | number)[];
@@ -185,6 +186,10 @@ export interface ColorRef {
   rgb: RGB;
   hex: string;
   animated: boolean;
+  /** For animated colors: path to the animatable prop and the keyframe
+   *  index under the sampled frame (-1 = between keys → auto-key). */
+  propPath?: Path;
+  keyIndex?: number;
 }
 
 interface Shape {
@@ -214,6 +219,7 @@ function collectShapeColors(
   basePath: Path,
   prefix: string,
   out: ColorRef[],
+  frame: number,
 ): void {
   if (!Array.isArray(shapes)) return;
   shapes.forEach((shape, i) => {
@@ -223,24 +229,35 @@ function collectShapeColors(
     const label = prefix ? `${prefix} › ${name}` : name;
 
     if (shape.ty === "gr") {
-      collectShapeColors(shape.it, [...path, "it"], label, out);
+      collectShapeColors(shape.it, [...path, "it"], label, out, frame);
       return;
     }
 
     if (shape.ty === "fl" || shape.ty === "st") {
       const c = shape.c;
       const animated = isAnimated(c);
-      const raw = animated
-        ? staticVector(c, [0, 0, 0])
-        : Array.isArray(c?.k)
-          ? (c?.k as number[])
-          : [0, 0, 0];
+      if (animated) {
+        // Animated colors sample at the playhead and edit keyframes.
+        const k = (c?.k ?? []) as Keyframe[];
+        const rounded = Math.round(frame);
+        pushColorRef(out, {
+          path: [...path, "c", "k"],
+          propPath: [...path, "c"],
+          keyIndex: k.findIndex((kf) => Math.round(kf.t) === rounded),
+          kind: shape.ty === "fl" ? "fill" : "stroke",
+          name: label,
+          rgb: normalizeComponents(sampleKeyframes(k, frame)),
+          animated: true,
+        });
+        return;
+      }
+      const raw = Array.isArray(c?.k) ? (c?.k as number[]) : [0, 0, 0];
       pushColorRef(out, {
         path: [...path, "c", "k"],
         kind: shape.ty === "fl" ? "fill" : "stroke",
         name: label,
         rgb: normalizeComponents(raw),
-        animated,
+        animated: false,
       });
       return;
     }
@@ -278,6 +295,7 @@ function collectLayerColorRefs(
   layerLabel: string,
   out: ColorRef[],
   visitedAssets: Set<string>,
+  frame: number,
 ): void {
   // Solid layers carry their color as a hex string.
   if (layer.ty === 1 && typeof layer.sc === "string") {
@@ -300,6 +318,7 @@ function collectLayerColorRefs(
     [...layerPath, "shapes"],
     layerLabel,
     out,
+    frame,
   );
 
   // Recurse into precomp assets so nested colors are editable too.
@@ -322,6 +341,7 @@ function collectLayerColorRefs(
           `${layerLabel} › ${layerName(sub, si)}`,
           out,
           visitedAssets,
+          frame,
         );
       });
     }
@@ -331,6 +351,7 @@ function collectLayerColorRefs(
 export function collectLayerColors(
   doc: LottieDoc,
   layerIndex: number,
+  frame = 0,
 ): ColorRef[] {
   const layer = doc.layers[layerIndex];
   if (!layer) return [];
@@ -342,11 +363,12 @@ export function collectLayerColors(
     layerName(layer, layerIndex),
     out,
     new Set(),
+    frame,
   );
   return out;
 }
 
-export function collectDocColors(doc: LottieDoc): ColorRef[] {
+export function collectDocColors(doc: LottieDoc, frame = 0): ColorRef[] {
   const out: ColorRef[] = [];
   const visited = new Set<string>();
   doc.layers.forEach((layer, i) => {
@@ -357,13 +379,21 @@ export function collectDocColors(doc: LottieDoc): ColorRef[] {
       layerName(layer, i),
       out,
       visited,
+      frame,
     );
   });
   return out;
 }
 
-/** Apply a color (0..1 rgb) to a draft doc through a ColorRef. */
-export function applyColorRef(draft: LottieDoc, ref: ColorRef, rgb: RGB): void {
+/** Apply a color (0..1 rgb) to a draft doc through a ColorRef.
+ *  Animated colors write the keyframe under `frame`, inserting one at the
+ *  sampled value first if none exists (auto-keying). */
+export function applyColorRef(
+  draft: LottieDoc,
+  ref: ColorRef,
+  rgb: RGB,
+  frame = 0,
+): void {
   if (ref.kind === "solid") {
     lset(draft, ref.path, rgbToHex(rgb));
     return;
@@ -374,6 +404,18 @@ export function applyColorRef(draft: LottieDoc, ref: ColorRef, rgb: RGB): void {
     flat[ref.stopOffset + 1] = rgb[0];
     flat[ref.stopOffset + 2] = rgb[1];
     flat[ref.stopOffset + 3] = rgb[2];
+    return;
+  }
+  if (ref.animated && ref.propPath) {
+    let index = ref.keyIndex ?? -1;
+    if (index === -1) index = addKeyframe(draft, ref.propPath, frame);
+    if (index === -1) return;
+    const k = lget(draft, [...ref.propPath, "k"]) as Keyframe[] | undefined;
+    const kf = k?.[index];
+    if (!kf || !Array.isArray(kf.s)) return;
+    kf.s[0] = rgb[0];
+    kf.s[1] = rgb[1];
+    kf.s[2] = rgb[2];
     return;
   }
   const existing = lget(draft, ref.path) as number[] | undefined;

@@ -473,6 +473,21 @@ export function setEasing(
   kf.i = { x: handles.i.x, y: handles.i.y };
 }
 
+/** Set one side of a segment's easing without touching the other. */
+export function setEasingHandle(
+  draft: LottieDoc,
+  path: Path,
+  index: number,
+  which: "o" | "i",
+  handle: { x: number; y: number },
+): void {
+  const prop = propAt(draft, path);
+  if (!prop || !prop.k[index]) return;
+  const kf = prop.k[index];
+  delete kf.h;
+  kf[which] = { x: handle.x, y: handle.y };
+}
+
 export type EasingPresetId =
   | "linear"
   | "smooth"

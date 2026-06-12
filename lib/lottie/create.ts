@@ -132,6 +132,103 @@ export function addShapeLayer(
   draft.layers.unshift(layer);
 }
 
+export interface PenVertex {
+  /** Vertex position in composition coordinates. */
+  v: [number, number];
+  /** In/out bezier tangents, relative to the vertex. */
+  i: [number, number];
+  o: [number, number];
+}
+
+/** Insert a new shape layer containing a bezier path drawn with the pen
+ *  tool. Path coordinates are composition coordinates (the layer transform
+ *  is identity). Closed paths get a fill; open paths only a stroke. */
+export function addPathLayer(
+  draft: LottieDoc,
+  vertices: PenVertex[],
+  closed: boolean,
+): void {
+  if (vertices.length < 2) return;
+  const count = draft.layers.filter((l) =>
+    (l.nm ?? "").startsWith("Path"),
+  ).length;
+  const name = `Path ${count + 1}`;
+  const fill =
+    FILL_CYCLE[
+      draft.layers.filter((l) => l.ty === 4).length % FILL_CYCLE.length
+    ];
+  const maxInd = Math.max(0, ...draft.layers.map((l) => l.ind ?? 0));
+
+  const items: Record<string, unknown>[] = [
+    {
+      ty: "sh",
+      nm: "Path",
+      ks: {
+        a: 0,
+        k: {
+          i: vertices.map((p) => p.i),
+          o: vertices.map((p) => p.o),
+          v: vertices.map((p) => p.v),
+          c: closed,
+        },
+      },
+    },
+  ];
+  if (closed) {
+    items.push({
+      ty: "fl",
+      nm: "Fill 1",
+      c: staticVal([...fill]),
+      o: staticVal(100),
+      r: 1,
+    });
+  }
+  items.push(
+    {
+      ty: "st",
+      nm: "Stroke 1",
+      c: staticVal(closed ? [1, 1, 1] : [...fill]),
+      o: staticVal(100),
+      w: staticVal(4),
+      lc: 2,
+      lj: 2,
+    },
+    {
+      ty: "tr",
+      nm: "Transform",
+      p: staticVal([0, 0]),
+      a: staticVal([0, 0]),
+      s: staticVal([100, 100]),
+      r: staticVal(0),
+      o: staticVal(100),
+      sk: staticVal(0),
+      sa: staticVal(0),
+    },
+  );
+
+  const layer: LottieLayer = {
+    ty: 4,
+    nm: name,
+    ind: maxInd + 1,
+    ip: draft.ip,
+    op: draft.op,
+    st: 0,
+    sr: 1,
+    ao: 0,
+    bm: 0,
+    ks: {
+      o: staticVal(100),
+      r: staticVal(0),
+      p: staticVal([0, 0, 0]),
+      a: staticVal([0, 0, 0]),
+      s: staticVal([100, 100, 100]),
+    },
+    shapes: [{ ty: "gr", nm: name, it: items }],
+  };
+
+  draft.layers.unshift(layer);
+}
+
 /** A fresh, empty composition for starting from scratch. */
 export function blankDoc(): LottieDoc {
   return {

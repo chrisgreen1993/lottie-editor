@@ -9,7 +9,7 @@ const COALESCE_WINDOW_MS = 900;
 
 export type CanvasBackground = "checker" | "dark" | "light" | "doc";
 export type Zoom = number | "fit";
-export type CanvasTool = "select" | "rect" | "ellipse" | "star";
+export type CanvasTool = "select" | "rect" | "ellipse" | "star" | "pen";
 
 export interface PanelSizes {
   layerPanelW: number;
@@ -82,6 +82,8 @@ interface EditorState {
   snapGuide: number | null;
   /** Timeline rows show the value graph of the selected track. */
   graphMode: boolean;
+  /** Layer whose path vertices are being edited on canvas, or null. */
+  pathEdit: number | null;
 
   past: LottieDoc[];
   future: LottieDoc[];
@@ -111,6 +113,7 @@ interface EditorState {
   toggleKeyframe: (selection: KeyframeSelection) => void;
   setSnapGuide: (frame: number | null) => void;
   setGraphMode: (on: boolean) => void;
+  setPathEdit: (layer: number | null) => void;
 
   setPlaying: (playing: boolean) => void;
   setCurrentFrame: (frame: number) => void;
@@ -141,6 +144,7 @@ export const useEditor = create<EditorState>((set, get) => ({
   selectedKeyframes: [],
   snapGuide: null,
   graphMode: false,
+  pathEdit: null,
 
   past: [],
   future: [],
@@ -166,6 +170,7 @@ export const useEditor = create<EditorState>((set, get) => ({
       selectedLayer: null,
       selectedKeyframes: [],
       graphMode: false,
+      pathEdit: null,
       past: [],
       future: [],
       lastCoalesceKey: null,
@@ -184,6 +189,7 @@ export const useEditor = create<EditorState>((set, get) => ({
       selectedLayer: null,
       selectedKeyframes: [],
       graphMode: false,
+      pathEdit: null,
       past: [],
       future: [],
       lastCoalesceKey: null,
@@ -244,6 +250,7 @@ export const useEditor = create<EditorState>((set, get) => ({
       lastCoalesceKey: null,
       selectedLayer: null,
       selectedKeyframes: [],
+      pathEdit: null,
     });
     scheduleSave(previous, fileName);
   },
@@ -259,6 +266,7 @@ export const useEditor = create<EditorState>((set, get) => ({
       lastCoalesceKey: null,
       selectedLayer: null,
       selectedKeyframes: [],
+      pathEdit: null,
     });
     scheduleSave(next, fileName);
   },
@@ -287,6 +295,7 @@ export const useEditor = create<EditorState>((set, get) => ({
   },
   setSnapGuide: (snapGuide) => set({ snapGuide }),
   setGraphMode: (graphMode) => set({ graphMode }),
+  setPathEdit: (pathEdit) => set({ pathEdit }),
 
   setPlaying: (isPlaying) => set({ isPlaying }),
   setCurrentFrame: (currentFrame) => set({ currentFrame }),

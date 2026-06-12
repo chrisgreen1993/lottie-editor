@@ -283,11 +283,12 @@ function TransformPropRow({
 function LayerSettings({ index }: { index: number }) {
   const doc = useEditor((s) => s.doc)!;
   const update = useEditor((s) => s.update);
+  const frame = useEditor((s) => Math.round(s.currentFrame));
   const layer = doc.layers[index];
 
   const colors = React.useMemo(
-    () => collectLayerColors(doc, index),
-    [doc, index],
+    () => collectLayerColors(doc, index, frame),
+    [doc, index, frame],
   );
   const strokes = React.useMemo(
     () => collectStrokeWidths(doc, index),
@@ -322,14 +323,22 @@ function LayerSettings({ index }: { index: number }) {
             <ColorSwatch
               key={ref.id}
               label={ref.name}
-              subtitle={ref.kind}
-              rgb={ref.rgb}
-              disabled={ref.animated}
-              onChange={(rgb) =>
-                update((draft) => applyColorRef(draft, ref, rgb), {
-                  coalesceKey: `color-${ref.id}`,
-                })
+              subtitle={
+                ref.animated
+                  ? `${ref.kind} · animated${ref.keyIndex !== -1 ? " · on key" : ""}`
+                  : ref.kind
               }
+              rgb={ref.rgb}
+              onChange={(rgb) => {
+                // Editing an animated color mid-playback would spray keys
+                // across frames — pause at the first change.
+                const state = useEditor.getState();
+                if (ref.animated && state.isPlaying) state.setPlaying(false);
+                const f = Math.round(state.currentFrame);
+                update((draft) => applyColorRef(draft, ref, rgb, f), {
+                  coalesceKey: `color-${ref.id}`,
+                });
+              }}
             />
           ))}
         </Section>

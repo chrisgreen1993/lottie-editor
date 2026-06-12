@@ -37,6 +37,7 @@ import {
   moveKeyframe,
   moveKeyframesBy,
   setEasing,
+  setEasingHandle,
   setKeyframeValue,
   type AnimProp,
   type Keyframe,
@@ -880,8 +881,147 @@ function GraphView({ geom }: { geom: TrackGeometry }) {
             );
           }),
         )}
+        <GraphHandles
+          prop={prop}
+          k={k}
+          values={values}
+          selectedIndex={primary.index}
+          path={primary.path}
+          geom={geom}
+          yOf={yOf}
+          range={{ lo, hi, H }}
+          update={update}
+        />
       </svg>
     </div>
+  );
+}
+
+/** Draggable easing handles around the selected keyframe — the outgoing
+ *  handle of its segment and the incoming handle of the previous one. */
+function GraphHandles({
+  prop,
+  k,
+  values,
+  selectedIndex,
+  path,
+  geom,
+  yOf,
+  range,
+  update,
+}: {
+  prop: AnimProp;
+  k: Keyframe[];
+  values: number[][];
+  selectedIndex: number;
+  path: (string | number)[];
+  geom: TrackGeometry;
+  yOf: (v: number) => number;
+  range: { lo: number; hi: number; H: number };
+  update: ReturnType<typeof useEditor.getState>["update"];
+}) {
+  const segments: {
+    kfIndex: number;
+    which: "o" | "i";
+  }[] = [];
+  if (selectedIndex < k.length - 1 && k[selectedIndex].h !== 1) {
+    segments.push({ kfIndex: selectedIndex, which: "o" });
+  }
+  if (selectedIndex > 0 && k[selectedIndex - 1].h !== 1) {
+    segments.push({ kfIndex: selectedIndex - 1, which: "i" });
+  }
+  if (segments.length === 0) return null;
+
+  const dim = 0;
+  const valueAt = (i: number) => values[i][dim] ?? values[i][0] ?? 0;
+
+  return (
+    <>
+      {segments.map(({ kfIndex, which }) => {
+        const t0 = k[kfIndex].t;
+        const t1 = k[kfIndex + 1].t;
+        const v0 = valueAt(kfIndex);
+        const v1 = valueAt(kfIndex + 1);
+        const ease = getEasing(prop, kfIndex);
+        if (!ease) return null;
+        const h = ease[which];
+        const hx = frameToX(geom, t0 + h.x * (t1 - t0));
+        const hy = yOf(v0 + h.y * (v1 - v0));
+        const anchorT = which === "o" ? t0 : t1;
+        const anchorV = which === "o" ? v0 : v1;
+        const ax = frameToX(geom, anchorT);
+        const ay = yOf(anchorV);
+
+        const onPointerDown = (e: React.PointerEvent) => {
+          e.stopPropagation();
+          e.preventDefault();
+          const target = e.currentTarget as Element;
+          const svg = target.closest("svg");
+          if (!svg) return;
+          try {
+            target.setPointerCapture(e.pointerId);
+          } catch {
+            // Synthetic or already-released pointers can lack an active id.
+          }
+          const rect = svg.getBoundingClientRect();
+          const startY = h.y;
+          const flat = Math.abs(v1 - v0) < 1e-6;
+          const onMove = (ev: PointerEvent) => {
+            const frame = xToFrame(geom, ev.clientX - rect.left);
+            const value =
+              range.hi -
+              ((ev.clientY - rect.top) / range.H) * (range.hi - range.lo);
+            const x = Math.min(1, Math.max(0, (frame - t0) / (t1 - t0)));
+            const y = flat ? startY : (value - v0) / (v1 - v0);
+            update(
+              (draft) => setEasingHandle(draft, path, kfIndex, which, { x, y }),
+              {
+                coalesceKey: `graph-ease-${path.join(".")}-${kfIndex}-${which}`,
+              },
+            );
+          };
+          const onUp = () => {
+            target.removeEventListener("pointermove", onMove as EventListener);
+            target.removeEventListener("pointerup", onUp);
+          };
+          target.addEventListener("pointermove", onMove as EventListener);
+          target.addEventListener("pointerup", onUp);
+        };
+
+        return (
+          <g key={`${kfIndex}-${which}`}>
+            <line
+              x1={ax}
+              y1={ay}
+              x2={hx}
+              y2={hy}
+              className="stroke-foreground/50"
+              strokeWidth={1}
+              strokeDasharray="2 2"
+            />
+            <circle
+              cx={hx}
+              cy={hy}
+              r={4.5}
+              className={cn(
+                "cursor-grab stroke-2 active:cursor-grabbing",
+                which === "o"
+                  ? "fill-background stroke-primary"
+                  : "fill-background stroke-amber-400",
+              )}
+              onPointerDown={onPointerDown}
+            >
+              <title>
+                {which === "o"
+                  ? "Ease out of the keyframe"
+                  : "Ease into the keyframe"}{" "}
+                — drag to shape the curve
+              </title>
+            </circle>
+          </g>
+        );
+      })}
+    </>
   );
 }
 

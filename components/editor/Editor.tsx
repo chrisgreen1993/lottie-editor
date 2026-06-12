@@ -145,16 +145,21 @@ export function Editor() {
         }
       }
       if (e.key === "Escape") {
-        if (state.tool !== "select") state.setTool("select");
+        if (state.pathEdit !== null) state.setPathEdit(null);
+        else if (state.tool !== "select") state.setTool("select");
         else if (state.selectedKeyframes.length) state.selectKeyframe(null);
         else state.selectLayer(null);
         return;
       }
       // Tool shortcuts (no modifier).
       if (!mod && !e.altKey) {
-        const tool = { v: "select", r: "rect", e: "ellipse", s: "star" }[
-          e.key.toLowerCase()
-        ];
+        const tool = {
+          v: "select",
+          r: "rect",
+          e: "ellipse",
+          s: "star",
+          p: "pen",
+        }[e.key.toLowerCase()];
         if (tool) {
           state.setTool(tool as Parameters<typeof state.setTool>[0]);
           return;

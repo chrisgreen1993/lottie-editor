@@ -6,6 +6,7 @@ import {
   Maximize,
   Minus,
   MousePointer2,
+  PenTool,
   Plus,
   Square,
   Star,
@@ -14,8 +15,15 @@ import * as React from "react";
 
 import { CanvasOverlay } from "@/components/editor/CanvasOverlay";
 import { IconButton } from "@/components/editor/fields";
-import { addShapeLayer, type ShapeKind } from "@/lib/lottie/create";
+import { PathEditOverlay } from "@/components/editor/PathEditOverlay";
+import {
+  addPathLayer,
+  addShapeLayer,
+  type PenVertex,
+  type ShapeKind,
+} from "@/lib/lottie/create";
 import { collapseSingleKeyframes } from "@/lib/lottie/keyframes";
+import { hasEditablePath } from "@/lib/lottie/pathEdit";
 import { playerBridge } from "@/lib/playerBridge";
 import { useEditor, type CanvasBackground, type CanvasTool } from "@/lib/store";
 import { cn } from "@/lib/utils";
@@ -25,7 +33,34 @@ const TOOLS: { id: CanvasTool; label: string; icon: React.ReactNode }[] = [
   { id: "rect", label: "Rectangle (R)", icon: <Square size={14} /> },
   { id: "ellipse", label: "Ellipse (E)", icon: <Circle size={14} /> },
   { id: "star", label: "Star (S)", icon: <Star size={14} /> },
+  { id: "pen", label: "Pen (P)", icon: <PenTool size={14} /> },
 ];
+
+/** Preview path for the in-progress pen drawing (screen coordinates). */
+function penPathD(
+  points: PenVertex[],
+  cursor: [number, number] | null,
+  scale: number,
+): string {
+  if (points.length === 0) return "";
+  let d = `M ${points[0].v[0] * scale} ${points[0].v[1] * scale}`;
+  for (let j = 0; j < points.length - 1; j++) {
+    const a = points[j];
+    const b = points[j + 1];
+    d += ` C ${(a.v[0] + a.o[0]) * scale} ${(a.v[1] + a.o[1]) * scale}, ${
+      (b.v[0] + b.i[0]) * scale
+    } ${(b.v[1] + b.i[1]) * scale}, ${b.v[0] * scale} ${b.v[1] * scale}`;
+  }
+  if (cursor) {
+    const last = points[points.length - 1];
+    d += ` C ${(last.v[0] + last.o[0]) * scale} ${
+      (last.v[1] + last.o[1]) * scale
+    }, ${cursor[0] * scale} ${cursor[1] * scale}, ${cursor[0] * scale} ${
+      cursor[1] * scale
+    }`;
+  }
+  return d;
+}
 
 const BG_OPTIONS: {
   value: CanvasBackground;
@@ -64,6 +99,47 @@ export function CanvasStage() {
     y1: number;
   } | null>(null);
   const justDrewRef = React.useRef(false);
+  const pathEdit = useEditor((s) => s.pathEdit);
+  const setPathEdit = useEditor((s) => s.setPathEdit);
+  const [penPoints, setPenPoints] = React.useState<PenVertex[]>([]);
+  const [penCursor, setPenCursor] = React.useState<[number, number] | null>(
+    null,
+  );
+
+  // Leaving the pen tool discards an unfinished path.
+  React.useEffect(() => {
+    if (tool !== "pen") {
+      setPenPoints([]);
+      setPenCursor(null);
+    }
+  }, [tool]);
+
+  const finishPen = React.useCallback(
+    (closed: boolean, points: PenVertex[]) => {
+      if (points.length >= 2) {
+        update((draft) => addPathLayer(draft, points, closed));
+        selectLayer(0);
+        justDrewRef.current = true;
+      }
+      setPenPoints([]);
+      setPenCursor(null);
+      setTool("select");
+    },
+    [update, selectLayer, setTool],
+  );
+
+  // Enter finishes an open pen path.
+  React.useEffect(() => {
+    if (tool !== "pen") return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Enter" && penPoints.length >= 2) {
+        e.preventDefault();
+        finishPen(false, penPoints);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [tool, penPoints, finishPen]);
 
   const containerRef = React.useRef<HTMLDivElement>(null);
   const stageRef = React.useRef<HTMLDivElement>(null);
@@ -175,8 +251,62 @@ export function CanvasStage() {
   };
 
   // Drag-to-draw a new shape layer when a shape tool is active.
+  // Pen tool: click to place vertices, drag to pull out smooth tangents,
+  // click the first vertex to close, Enter to finish open.
+  const onPenDown = (e: React.PointerEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const wrapper = e.currentTarget as HTMLElement;
+    const rect = wrapper.getBoundingClientRect();
+    const docPt: [number, number] = [
+      (e.clientX - rect.left) / scale,
+      (e.clientY - rect.top) / scale,
+    ];
+
+    // Closing click on the first vertex?
+    if (penPoints.length >= 3) {
+      const first = penPoints[0].v;
+      const dx = (first[0] - docPt[0]) * scale;
+      const dy = (first[1] - docPt[1]) * scale;
+      if (Math.hypot(dx, dy) < 10) {
+        finishPen(true, penPoints);
+        return;
+      }
+    }
+
+    const vertex: PenVertex = { v: docPt, i: [0, 0], o: [0, 0] };
+    setPenPoints((prev) => [...prev, vertex]);
+    const index = penPoints.length;
+
+    try {
+      wrapper.setPointerCapture(e.pointerId);
+    } catch {
+      // Synthetic or already-released pointers can lack an active id.
+    }
+    const onMove = (ev: PointerEvent) => {
+      // Dragging pulls out a smooth (mirrored) tangent pair.
+      const ox = (ev.clientX - rect.left) / scale - docPt[0];
+      const oy = (ev.clientY - rect.top) / scale - docPt[1];
+      setPenPoints((prev) =>
+        prev.map((p, i) =>
+          i === index ? { ...p, o: [ox, oy], i: [-ox, -oy] } : p,
+        ),
+      );
+    };
+    const onUp = () => {
+      wrapper.removeEventListener("pointermove", onMove);
+      wrapper.removeEventListener("pointerup", onUp);
+    };
+    wrapper.addEventListener("pointermove", onMove);
+    wrapper.addEventListener("pointerup", onUp);
+  };
+
   const onDrawStart = (e: React.PointerEvent) => {
     if (tool === "select") return;
+    if (tool === "pen") {
+      onPenDown(e);
+      return;
+    }
     e.preventDefault();
     e.stopPropagation();
     const wrapper = e.currentTarget as HTMLElement;
@@ -222,6 +352,30 @@ export function CanvasStage() {
   };
 
   // Map a click on the rendered SVG back to the layer that drew it.
+  // Double-click a layer with bezier paths to edit its vertices.
+  const onStageDoubleClick = (e: React.MouseEvent) => {
+    if (tool !== "select" || pathEdit !== null || !doc) return;
+    const target = e.target as Element;
+    if (target.closest("[data-canvas-overlay]")) return;
+    const anim = playerBridge.get() as unknown as {
+      renderer?: {
+        elements?: Array<{ layerElement?: SVGGElement } | undefined>;
+      };
+    } | null;
+    const elements = anim?.renderer?.elements ?? [];
+    for (let i = 0; i < elements.length; i++) {
+      const node = elements[i]?.layerElement;
+      if (node && (node === target || node.contains(target))) {
+        if (hasEditablePath(doc, i)) {
+          setPlaying(false);
+          selectLayer(i);
+          setPathEdit(i);
+        }
+        return;
+      }
+    }
+  };
+
   const onStageClick = (e: React.MouseEvent) => {
     if (tool !== "select") return;
     if (justDrewRef.current) {
@@ -280,7 +434,19 @@ export function CanvasStage() {
               cursor: tool === "select" ? undefined : "crosshair",
             }}
             onClick={onStageClick}
+            onDoubleClick={onStageDoubleClick}
             onPointerDown={onDrawStart}
+            onPointerMove={
+              tool === "pen" && penPoints.length > 0
+                ? (e) => {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    setPenCursor([
+                      (e.clientX - rect.left) / scale,
+                      (e.clientY - rect.top) / scale,
+                    ]);
+                  }
+                : undefined
+            }
           >
             <div
               ref={stageRef}
@@ -291,7 +457,11 @@ export function CanvasStage() {
                 transformOrigin: "top left",
               }}
             />
-            {tool === "select" && <CanvasOverlay scale={scale} />}
+            {pathEdit !== null ? (
+              <PathEditOverlay />
+            ) : (
+              tool === "select" && <CanvasOverlay scale={scale} />
+            )}
             {drawRect && (
               <div
                 className={cn(
@@ -306,11 +476,35 @@ export function CanvasStage() {
                 }}
               />
             )}
+            {tool === "pen" && penPoints.length > 0 && (
+              <svg className="pointer-events-none absolute inset-0 h-full w-full overflow-visible">
+                <path
+                  d={penPathD(penPoints, penCursor, scale)}
+                  fill="none"
+                  className="stroke-primary"
+                  strokeWidth={1.5}
+                  strokeDasharray="4 3"
+                />
+                {penPoints.map((p, i) => (
+                  <circle
+                    key={i}
+                    cx={p.v[0] * scale}
+                    cy={p.v[1] * scale}
+                    r={i === 0 && penPoints.length >= 3 ? 6 : 3.5}
+                    className={cn(
+                      "fill-background stroke-primary",
+                      i === 0 && penPoints.length >= 3 && "fill-primary/30",
+                    )}
+                    strokeWidth={1.5}
+                  />
+                ))}
+              </svg>
+            )}
           </div>
         </div>
       </div>
 
-      <div className="pointer-events-none absolute inset-x-0 top-3 flex justify-center">
+      <div className="pointer-events-none absolute inset-x-0 top-3 flex flex-col items-center gap-1.5">
         <div className="pointer-events-auto flex items-center gap-0.5 rounded-lg border border-border bg-card/90 px-1.5 py-1 shadow-lg backdrop-blur">
           {TOOLS.map((t) => (
             <IconButton
@@ -323,6 +517,12 @@ export function CanvasStage() {
             </IconButton>
           ))}
         </div>
+        {tool === "pen" && (
+          <div className="rounded-md border border-border bg-card/90 px-2 py-0.5 text-[10px] text-muted-foreground shadow backdrop-blur">
+            Click to add points · drag for curves · click the first point to
+            close · Enter finishes open · Esc cancels
+          </div>
+        )}
       </div>
 
       <div className="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center">

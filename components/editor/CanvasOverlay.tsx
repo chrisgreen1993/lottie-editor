@@ -4,6 +4,7 @@ import { RotateCw } from "lucide-react";
 import * as React from "react";
 
 import { sampleProp, type AnimProp } from "@/lib/lottie/keyframes";
+import { hasEditablePath } from "@/lib/lottie/pathEdit";
 import { setTransformAtPlayhead } from "@/lib/lottie/transformEdit";
 import { playerBridge } from "@/lib/playerBridge";
 import { useEditor } from "@/lib/store";
@@ -121,6 +122,11 @@ export function CanvasOverlay({ scale }: { scale: number }) {
 
   const rootRef = React.useRef<HTMLDivElement>(null);
   const [box, setBox] = React.useState<Box | null>(null);
+  const lastDownRef = React.useRef<{ time: number; x: number; y: number }>({
+    time: 0,
+    x: 0,
+    y: 0,
+  });
 
   // The lottie instance rebuilds asynchronously after document edits and
   // moves every frame during playback, so track the layer's screen box on a
@@ -177,6 +183,21 @@ export function CanvasOverlay({ scale }: { scale: number }) {
     e.stopPropagation();
     e.preventDefault();
     setPlaying(false);
+
+    // preventDefault on pointerdown suppresses the browser's dblclick, so
+    // a quick second press on the box opens path editing manually.
+    if (mode === "move") {
+      const last = lastDownRef.current;
+      const now = performance.now();
+      const isDouble =
+        now - last.time < 350 &&
+        Math.hypot(e.clientX - last.x, e.clientY - last.y) < 6;
+      lastDownRef.current = { time: now, x: e.clientX, y: e.clientY };
+      if (isDouble && doc && hasEditablePath(doc, selected)) {
+        useEditor.getState().setPathEdit(selected);
+        return;
+      }
+    }
 
     const state = useEditor.getState();
     const layer = state.doc?.layers[selected];

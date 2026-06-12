@@ -8,6 +8,8 @@ A browser-based [Lottie animation](https://lottie.github.io/) editor — inspect
 
 - Drag & drop a `.json` anywhere, browse files, load from a URL, try the bundled example — or start from a blank composition
 - Shape tools: draw rectangles, ellipses and stars directly on the canvas (`V`/`R`/`E`/`S`); a click drops a default-sized shape
+- Pen tool (`P`): click to place vertices, drag to pull out smooth curves, click the first point to close (filled) or press Enter to finish an open stroke
+- Path editing: double-click a path layer to drag its vertices and bezier tangents right on the canvas
 - Validation with friendly errors; sessions are autosaved and restored on reload
 
 **Edit**
@@ -26,7 +28,8 @@ A browser-based [Lottie animation](https://lottie.github.io/) editor — inspect
 - Per-layer bars: drag to shift a layer in time, drag the edges to trim in/out points
 - Hold `⇧` while dragging keyframes, layer bars or the playhead to snap to nearby keyframes, layer bounds and the playhead — an amber guide line marks the snapped frame
 - `⌘`-click keyframes to multi-select; drag any selected diamond to retime the whole group (relative spacing preserved), apply easing presets to all, or delete them together
-- Graph editor: toggle the timeline into a value-curve view of the selected track — one curve per component with bezier easing rendered, drag points to retime (x) and change values (y)
+- Graph editor: toggle the timeline into a value-curve view of the selected track — one curve per component with bezier easing rendered, drag points to retime (x) and change values (y), and drag the easing handles around the selected keyframe to shape the curve directly
+- Animated colors are editable too: swatches sample the playhead and auto-key on change, just like transforms
 - Expandable per-property tracks for every animated property
 - Drag keyframes to retime them, double-click a track to add one, delete from the keyframe toolbar
 - Easing presets (linear, smooth, ease in/out, hold) plus an interactive bezier curve editor per segment
