@@ -65,11 +65,23 @@ export interface KeyframeSelection {
   label: string;
 }
 
+export function keyframeSelectionId(sel: {
+  path: Path;
+  index: number;
+}): string {
+  return `${sel.path.join(".")}:${sel.index}`;
+}
+
 interface EditorState {
   doc: LottieDoc | null;
   fileName: string;
   selectedLayer: number | null;
-  selectedKeyframe: KeyframeSelection | null;
+  /** Multi-selection; the first entry is the "primary" keyframe. */
+  selectedKeyframes: KeyframeSelection[];
+  /** Frame highlighted while a shift-drag snap is engaged, else null. */
+  snapGuide: number | null;
+  /** Timeline rows show the value graph of the selected track. */
+  graphMode: boolean;
 
   past: LottieDoc[];
   future: LottieDoc[];
@@ -96,6 +108,9 @@ interface EditorState {
   redo: () => void;
   selectLayer: (index: number | null) => void;
   selectKeyframe: (selection: KeyframeSelection | null) => void;
+  toggleKeyframe: (selection: KeyframeSelection) => void;
+  setSnapGuide: (frame: number | null) => void;
+  setGraphMode: (on: boolean) => void;
 
   setPlaying: (playing: boolean) => void;
   setCurrentFrame: (frame: number) => void;
@@ -123,7 +138,9 @@ export const useEditor = create<EditorState>((set, get) => ({
   doc: null,
   fileName: "animation",
   selectedLayer: null,
-  selectedKeyframe: null,
+  selectedKeyframes: [],
+  snapGuide: null,
+  graphMode: false,
 
   past: [],
   future: [],
@@ -147,7 +164,8 @@ export const useEditor = create<EditorState>((set, get) => ({
       doc,
       fileName: fileName.replace(/\.(json|lottie)$/i, "") || "animation",
       selectedLayer: null,
-      selectedKeyframe: null,
+      selectedKeyframes: [],
+      graphMode: false,
       past: [],
       future: [],
       lastCoalesceKey: null,
@@ -164,7 +182,8 @@ export const useEditor = create<EditorState>((set, get) => ({
       doc: null,
       fileName: "animation",
       selectedLayer: null,
-      selectedKeyframe: null,
+      selectedKeyframes: [],
+      graphMode: false,
       past: [],
       future: [],
       lastCoalesceKey: null,
@@ -224,7 +243,7 @@ export const useEditor = create<EditorState>((set, get) => ({
       future: [doc, ...future].slice(0, HISTORY_LIMIT),
       lastCoalesceKey: null,
       selectedLayer: null,
-      selectedKeyframe: null,
+      selectedKeyframes: [],
     });
     scheduleSave(previous, fileName);
   },
@@ -239,18 +258,35 @@ export const useEditor = create<EditorState>((set, get) => ({
       future: rest,
       lastCoalesceKey: null,
       selectedLayer: null,
-      selectedKeyframe: null,
+      selectedKeyframes: [],
     });
     scheduleSave(next, fileName);
   },
 
-  selectLayer: (index) => set({ selectedLayer: index, selectedKeyframe: null }),
-  selectKeyframe: (selectedKeyframe) =>
+  selectLayer: (index) => set({ selectedLayer: index, selectedKeyframes: [] }),
+  selectKeyframe: (selection) =>
     set(
-      selectedKeyframe
-        ? { selectedKeyframe, selectedLayer: selectedKeyframe.layer }
-        : { selectedKeyframe: null },
+      selection
+        ? { selectedKeyframes: [selection], selectedLayer: selection.layer }
+        : { selectedKeyframes: [] },
     ),
+  toggleKeyframe: (selection) => {
+    const { selectedKeyframes } = get();
+    const id = keyframeSelectionId(selection);
+    const existing = selectedKeyframes.filter(
+      (s) => keyframeSelectionId(s) !== id,
+    );
+    set(
+      existing.length < selectedKeyframes.length
+        ? { selectedKeyframes: existing }
+        : {
+            selectedKeyframes: [...selectedKeyframes, selection],
+            selectedLayer: selection.layer,
+          },
+    );
+  },
+  setSnapGuide: (snapGuide) => set({ snapGuide }),
+  setGraphMode: (graphMode) => set({ graphMode }),
 
   setPlaying: (isPlaying) => set({ isPlaying }),
   setCurrentFrame: (currentFrame) => set({ currentFrame }),

@@ -10,7 +10,7 @@ import { ResizeHandle } from "@/components/editor/ResizeHandle";
 import { Timeline } from "@/components/editor/Timeline";
 import { Toasts } from "@/components/editor/Toasts";
 import { TopBar } from "@/components/editor/TopBar";
-import { deleteKeyframe } from "@/lib/lottie/keyframes";
+import { deleteKeyframes } from "@/lib/lottie/keyframes";
 import { parseLottie } from "@/lib/lottie/model";
 import { deleteLayer, duplicateLayer } from "@/lib/lottie/ops";
 import { loadSession } from "@/lib/persistence";
@@ -128,11 +128,11 @@ export function Editor() {
         return;
       }
       if (e.key === "Delete" || e.key === "Backspace") {
-        // A selected keyframe takes precedence over the selected layer.
-        if (state.selectedKeyframe) {
+        // Selected keyframes take precedence over the selected layer.
+        if (state.selectedKeyframes.length > 0) {
           e.preventDefault();
-          const sel = state.selectedKeyframe;
-          state.update((draft) => deleteKeyframe(draft, sel.path, sel.index));
+          const refs = state.selectedKeyframes;
+          state.update((draft) => deleteKeyframes(draft, refs));
           state.selectKeyframe(null);
           return;
         }
@@ -146,7 +146,7 @@ export function Editor() {
       }
       if (e.key === "Escape") {
         if (state.tool !== "select") state.setTool("select");
-        else if (state.selectedKeyframe) state.selectKeyframe(null);
+        else if (state.selectedKeyframes.length) state.selectKeyframe(null);
         else state.selectLayer(null);
         return;
       }

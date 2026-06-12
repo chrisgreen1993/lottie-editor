@@ -32,7 +32,7 @@ export function isKeyframed(
   );
 }
 
-function keyframeValue(kf: Keyframe | undefined): number[] | null {
+export function keyframeValue(kf: Keyframe | undefined): number[] | null {
   if (!kf) return null;
   if (typeof kf.s === "number") return [kf.s];
   if (Array.isArray(kf.s)) return kf.s.slice();
@@ -220,6 +220,77 @@ function propAt(
   return prop && isKeyframed(prop)
     ? (prop as AnimProp & { k: Keyframe[] })
     : null;
+}
+
+export interface KeyframeRef {
+  path: Path;
+  index: number;
+}
+
+/** How far a group of keyframes may shift together without any of them
+ *  crossing a non-selected neighbor on its own track. */
+export function groupDeltaBounds(
+  doc: LottieDoc,
+  refs: KeyframeRef[],
+): { min: number; max: number } {
+  let min = -Infinity;
+  let max = Infinity;
+  const selectedByPath = new Map<string, Set<number>>();
+  for (const ref of refs) {
+    const key = ref.path.join(".");
+    if (!selectedByPath.has(key)) selectedByPath.set(key, new Set());
+    selectedByPath.get(key)!.add(ref.index);
+  }
+  for (const ref of refs) {
+    const prop = lget(doc, ref.path) as AnimProp | undefined;
+    if (!prop || !isKeyframed(prop)) continue;
+    const k = prop.k as Keyframe[];
+    const kf = k[ref.index];
+    if (!kf) continue;
+    const selected = selectedByPath.get(ref.path.join("."))!;
+    // Nearest non-selected neighbors (selected ones move along).
+    for (let i = ref.index - 1; i >= 0; i--) {
+      if (!selected.has(i)) {
+        min = Math.max(min, k[i].t + 1 - kf.t);
+        break;
+      }
+    }
+    for (let i = ref.index + 1; i < k.length; i++) {
+      if (!selected.has(i)) {
+        max = Math.min(max, k[i].t - 1 - kf.t);
+        break;
+      }
+    }
+  }
+  return { min, max };
+}
+
+/** Shift keyframes by a whole-frame delta; the caller is responsible for
+ *  keeping the delta within groupDeltaBounds. */
+export function moveKeyframesBy(
+  draft: LottieDoc,
+  refs: { path: Path; index: number; startT: number }[],
+  delta: number,
+): void {
+  const rounded = Math.round(delta);
+  for (const ref of refs) {
+    const prop = lget(draft, ref.path) as AnimProp | undefined;
+    if (!prop || !isKeyframed(prop)) continue;
+    const kf = (prop.k as Keyframe[])[ref.index];
+    if (kf) kf.t = Math.round(ref.startT) + rounded;
+  }
+}
+
+/** Delete several keyframes at once (descending index per track so the
+ *  indices stay valid while splicing). */
+export function deleteKeyframes(draft: LottieDoc, refs: KeyframeRef[]): void {
+  const sorted = [...refs].sort((a, b) => {
+    const pathCompare = a.path.join(".").localeCompare(b.path.join("."));
+    return pathCompare !== 0 ? pathCompare : b.index - a.index;
+  });
+  for (const ref of sorted) {
+    deleteKeyframe(draft, ref.path, ref.index);
+  }
 }
 
 export function moveKeyframe(
