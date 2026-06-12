@@ -1,11 +1,13 @@
 "use client";
 
-import { set as lset } from "lodash-es";
+import { get as lget, set as lset } from "lodash-es";
 import * as React from "react";
 
 import {
   autoSmoothVertex,
+  closePath,
   constrain45,
+  cutAtVertex,
   isCornerVertex,
   nearestOnSegment,
   pathToD,
@@ -152,6 +154,48 @@ export function PathEditOverlay() {
     update((draft) => lset(draft, p.dataPath, data));
   };
 
+  const selectedPath = selected !== null ? paths[selected.path] ?? null : null;
+
+  /** Sever the path at the selected vertex: closed paths open there, open
+   *  paths split into two shape items sharing the same group styles. */
+  const cutSelected = () => {
+    if (!selected || !selectedPath || selectedPath.animated) return;
+    const p = selectedPath;
+    const data = dataFor(p, selected.path);
+    const isInterior =
+      data.c || (selected.vertex > 0 && selected.vertex < data.v.length - 1);
+    if (!isInterior) return;
+    const pieces = cutAtVertex(data, selected.vertex);
+    update((draft) => {
+      lset(draft, p.dataPath, pieces[0]);
+      if (pieces.length === 2) {
+        // dataPath = [..., parentArray, shIndex, "ks", "k"]
+        const itemPath = p.dataPath.slice(0, -2);
+        const parentPath = itemPath.slice(0, -1);
+        const shIndex = itemPath[itemPath.length - 1] as number;
+        const parent = lget(draft, parentPath) as unknown[];
+        if (!Array.isArray(parent)) return;
+        const original = parent[shIndex] as { nm?: string };
+        const copy = structuredClone(original) as {
+          nm?: string;
+          ks?: unknown;
+        };
+        copy.ks = { a: 0, k: pieces[1] };
+        copy.nm = `${original.nm ?? "Path"} 2`;
+        // Right after the original keeps it under the same group styles.
+        parent.splice(shIndex + 1, 0, copy);
+      }
+    });
+    setSelected(null);
+  };
+
+  const closeSelected = () => {
+    if (!selected || !selectedPath || selectedPath.animated) return;
+    const data = dataFor(selectedPath, selected.path);
+    if (data.c) return;
+    commit(selectedPath, closePath(data));
+  };
+
   const previewArtwork = (data: BezierPathData) => {
     if (!artworkEls.length) return;
     const d = pathToD(data);
@@ -286,6 +330,34 @@ export function PathEditOverlay() {
           double-click a point for corner/smooth · ⌥ breaks handles · ⌫ deletes
           {hasAnimated && " · animated paths locked"}
         </span>
+        {selected && selectedPath && !selectedPath.animated && (
+          <>
+            <button
+              type="button"
+              className="rounded bg-secondary px-1.5 py-0.5 text-[10px] font-medium hover:bg-secondary/80 disabled:opacity-40"
+              disabled={
+                !dataFor(selectedPath, selected.path).c &&
+                (selected.vertex === 0 ||
+                  selected.vertex ===
+                    dataFor(selectedPath, selected.path).v.length - 1)
+              }
+              title="Sever the path at this point — a closed path opens here, an open path splits in two"
+              onClick={cutSelected}
+            >
+              ✂ Cut here
+            </button>
+            {!dataFor(selectedPath, selected.path).c && (
+              <button
+                type="button"
+                className="rounded bg-secondary px-1.5 py-0.5 text-[10px] font-medium hover:bg-secondary/80"
+                title="Join the open ends with a closing segment"
+                onClick={closeSelected}
+              >
+                Close path
+              </button>
+            )}
+          </>
+        )}
         <button
           type="button"
           className="rounded bg-secondary px-1.5 py-0.5 text-[10px] font-medium hover:bg-secondary/80"

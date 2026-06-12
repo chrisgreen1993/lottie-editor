@@ -10,6 +10,7 @@ A browser-based [Lottie animation](https://lottie.github.io/) editor — inspect
 - Shape tools: draw rectangles, ellipses and stars directly on the canvas (`V`/`R`/`E`/`S`); a click drops a default-sized shape
 - Pen tool (`P`): click to place vertices, drag to pull out smooth curves (⇧ snaps 45°), live fill preview, click the first point to close (filled) or press Enter to finish an open stroke
 - Path editing: double-click a path layer to edit on canvas — drag vertices and tangents at pointer speed (no re-render per move), click the outline to insert a point, ⌫ deletes one, double-click a point to toggle corner/smooth, ⌥ breaks tangent pairs, ⇧ snaps to 45°
+- Path topology: open paths are first-class — **Cut here** severs a path at the selected point (a closed path opens there, an open path splits into two), and **Close path** rejoins open ends
 - Validation with friendly errors; sessions are autosaved and restored on reload
 
 **Edit**

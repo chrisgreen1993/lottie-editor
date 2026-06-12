@@ -134,6 +134,67 @@ export function autoSmoothVertex(
   return out;
 }
 
+function clonePath(data: BezierPathData): BezierPathData {
+  return {
+    v: data.v.map((p) => [...p] as Pt),
+    i: data.i.map((p) => [...p] as Pt),
+    o: data.o.map((p) => [...p] as Pt),
+    c: data.c,
+  };
+}
+
+/** Sever a path at a vertex.
+ *  Closed paths open there: the loop is rotated to start at the vertex and
+ *  the vertex is duplicated at the far end, so both adjacent segments
+ *  survive. Open paths split into two paths sharing the cut vertex
+ *  (interior vertices only — cutting an endpoint is a no-op). */
+export function cutAtVertex(
+  data: BezierPathData,
+  index: number,
+): BezierPathData[] {
+  if (data.c) {
+    const rotate = <T>(arr: T[]): T[] => [
+      ...arr.slice(index),
+      ...arr.slice(0, index),
+    ];
+    const out = clonePath(data);
+    out.v = rotate(out.v);
+    out.i = rotate(out.i);
+    out.o = rotate(out.o);
+    out.v.push([...out.v[0]] as Pt);
+    out.i.push([...out.i[0]] as Pt);
+    out.o.push([0, 0]);
+    // The start copy keeps only the outgoing tangent, the end copy only
+    // the incoming one.
+    out.i[0] = [0, 0];
+    out.c = false;
+    return [out];
+  }
+  if (index <= 0 || index >= data.v.length - 1) return [clonePath(data)];
+  const a: BezierPathData = {
+    v: data.v.slice(0, index + 1).map((p) => [...p] as Pt),
+    i: data.i.slice(0, index + 1).map((p) => [...p] as Pt),
+    o: data.o.slice(0, index + 1).map((p) => [...p] as Pt),
+    c: false,
+  };
+  a.o[a.o.length - 1] = [0, 0];
+  const b: BezierPathData = {
+    v: data.v.slice(index).map((p) => [...p] as Pt),
+    i: data.i.slice(index).map((p) => [...p] as Pt),
+    o: data.o.slice(index).map((p) => [...p] as Pt),
+    c: false,
+  };
+  b.i[0] = [0, 0];
+  return [a, b];
+}
+
+/** Join an open path's ends with a closing segment. */
+export function closePath(data: BezierPathData): BezierPathData {
+  const out = clonePath(data);
+  out.c = true;
+  return out;
+}
+
 /** Constrain `to` so the segment from `from` lies on a 45° increment. */
 export function constrain45(from: Pt, to: Pt): Pt {
   const dx = to[0] - from[0];
