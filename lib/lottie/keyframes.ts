@@ -222,6 +222,40 @@ function propAt(
     : null;
 }
 
+/** lottie-web's interpolator assumes every animated property has at least
+ *  two keyframes; a single-keyframe property (the intermediate state right
+ *  after "animate" is clicked in the inspector) breaks rendering of the
+ *  whole composition. A single keyframe is just a constant, so collapse
+ *  those to static values. Mutates and returns the given (cloned) doc —
+ *  use on a copy for playback and export, never on the store document. */
+export function collapseSingleKeyframes(doc: LottieDoc): LottieDoc {
+  const visit = (node: unknown, depth: number): void => {
+    if (depth > 14 || node === null || typeof node !== "object") return;
+    if (Array.isArray(node)) {
+      for (const item of node) visit(item, depth + 1);
+      return;
+    }
+    const obj = node as AnimProp;
+    if (
+      obj.a === 1 &&
+      Array.isArray(obj.k) &&
+      obj.k.length === 1 &&
+      typeof obj.k[0] === "object" &&
+      obj.k[0] !== null
+    ) {
+      const value = keyframeValue(obj.k[0] as Keyframe);
+      if (value) {
+        obj.a = 0;
+        obj.k = value.length === 1 ? value[0] : value;
+        return;
+      }
+    }
+    for (const v of Object.values(obj)) visit(v, depth + 1);
+  };
+  visit(doc, 0);
+  return doc;
+}
+
 export interface KeyframeRef {
   path: Path;
   index: number;

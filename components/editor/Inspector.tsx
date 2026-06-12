@@ -28,6 +28,7 @@ import {
   setStrokeWidth,
   type Path,
 } from "@/lib/lottie/ops";
+import { playerBridge } from "@/lib/playerBridge";
 import { useEditor } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
@@ -241,6 +242,7 @@ function TransformPropRow({
       : "off-key";
 
   const onToggle = () => {
+    const removing = sampled.animated && sampled.keyIndex !== -1;
     update((draft) => {
       if (!sampled.animated) {
         convertToAnimated(draft, propPath, frame);
@@ -250,6 +252,14 @@ function TransformPropRow({
         addKeyframe(draft, propPath, frame);
       }
     });
+    if (!removing) {
+      // Park the playhead on the new key so the value is editable right
+      // away — otherwise playback carries it off the keyframe instantly.
+      const state = useEditor.getState();
+      state.setPlaying(false);
+      state.setCurrentFrame(frame);
+      playerBridge.seek(frame, false);
+    }
   };
 
   return (

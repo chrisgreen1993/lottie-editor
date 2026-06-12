@@ -15,6 +15,7 @@ import * as React from "react";
 import { CanvasOverlay } from "@/components/editor/CanvasOverlay";
 import { IconButton } from "@/components/editor/fields";
 import { addShapeLayer, type ShapeKind } from "@/lib/lottie/create";
+import { collapseSingleKeyframes } from "@/lib/lottie/keyframes";
 import { playerBridge } from "@/lib/playerBridge";
 import { useEditor, type CanvasBackground, type CanvasTool } from "@/lib/store";
 import { cn } from "@/lib/utils";
@@ -89,8 +90,10 @@ export function CanvasStage() {
         renderer: "svg",
         loop: state.loop,
         autoplay: false,
-        // lottie-web mutates animationData internally — never hand it the store copy.
-        animationData: structuredClone(doc),
+        // lottie-web mutates animationData internally — never hand it the
+        // store copy. Single-keyframe props would break its interpolator,
+        // so they're collapsed to constants for playback.
+        animationData: collapseSingleKeyframes(structuredClone(doc)),
       });
       item.setSpeed(state.speed);
 

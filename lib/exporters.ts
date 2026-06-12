@@ -1,5 +1,6 @@
 import { zipSync, strToU8 } from "fflate";
 
+import { collapseSingleKeyframes } from "./lottie/keyframes";
 import type { LottieDoc } from "./lottie/model";
 
 function downloadBlob(blob: Blob, filename: string): void {
@@ -11,12 +12,18 @@ function downloadBlob(blob: Blob, filename: string): void {
   URL.revokeObjectURL(url);
 }
 
+/** Export-ready copy: single-keyframe props collapse to constants so the
+ *  file plays in every lottie player. */
+function exportable(doc: LottieDoc): LottieDoc {
+  return collapseSingleKeyframes(structuredClone(doc));
+}
+
 export function downloadJson(
   doc: LottieDoc,
   fileName: string,
   pretty: boolean,
 ): void {
-  const json = JSON.stringify(doc, null, pretty ? 2 : undefined);
+  const json = JSON.stringify(exportable(doc), null, pretty ? 2 : undefined);
   downloadBlob(
     new Blob([json], { type: "application/json" }),
     `${fileName}.json`,
@@ -24,7 +31,7 @@ export function downloadJson(
 }
 
 export async function copyJson(doc: LottieDoc): Promise<void> {
-  await navigator.clipboard.writeText(JSON.stringify(doc));
+  await navigator.clipboard.writeText(JSON.stringify(exportable(doc)));
 }
 
 /** Package the animation as a .lottie (dotLottie) archive. */
@@ -36,7 +43,7 @@ export function downloadDotLottie(doc: LottieDoc, fileName: string): void {
   };
   const zipped = zipSync({
     "manifest.json": strToU8(JSON.stringify(manifest)),
-    "animations/animation.json": strToU8(JSON.stringify(doc)),
+    "animations/animation.json": strToU8(JSON.stringify(exportable(doc))),
   });
   const bytes = new Uint8Array(zipped);
   downloadBlob(
