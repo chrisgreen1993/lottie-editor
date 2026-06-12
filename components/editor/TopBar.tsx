@@ -81,7 +81,7 @@ export function TopBar({ onOpenFile }: { onOpenFile: () => void }) {
         <>
           <div className="mx-2 h-5 w-px bg-border" />
           <input
-            className="h-7 w-48 rounded border border-transparent bg-transparent px-2 text-xs text-foreground hover:border-input focus-visible:border-input focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            className="h-7 w-48 rounded-lg bg-transparent px-2 text-xs text-foreground transition-colors hover:bg-card focus-visible:bg-card focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             value={fileName}
             title="File name"
             onChange={(e) => setFileName(e.target.value)}

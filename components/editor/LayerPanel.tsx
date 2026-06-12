@@ -151,7 +151,7 @@ function LayerRow({
       {editing ? (
         <input
           autoFocus
-          className="h-5 min-w-0 flex-1 rounded border border-input bg-background px-1 text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          className="h-5 min-w-0 flex-1 rounded-md bg-background px-1.5 text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           value={nameText}
           onChange={(e) => setNameText(e.target.value)}
           onClick={(e) => e.stopPropagation()}

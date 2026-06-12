@@ -103,7 +103,7 @@ function TransportBar() {
       </IconButton>
 
       <select
-        className="ml-1 h-6 rounded border border-input bg-background px-1 text-[11px] tabular-nums text-foreground focus-visible:outline-none"
+        className="ml-1 h-6 rounded-md bg-background px-1.5 text-[11px] tabular-nums text-foreground focus-visible:outline-none"
         value={speed}
         title="Playback speed"
         onChange={(e) => setSpeed(Number(e.target.value))}
@@ -129,7 +129,7 @@ function TransportBar() {
         <span>{(Math.max(0, currentFrame - doc.ip) / doc.fr).toFixed(2)}s</span>
         <input
           type="number"
-          className="h-6 w-16 rounded border border-input bg-background px-1 text-right text-[11px] tabular-nums text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          className="h-6 w-16 rounded-md bg-background px-1.5 text-right text-[11px] tabular-nums text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           value={Math.round(currentFrame)}
           min={doc.ip}
           max={doc.op}
@@ -174,7 +174,7 @@ function KeyframeToolbar() {
       {!multi && (
         <input
           type="number"
-          className="h-6 w-14 rounded border border-input bg-background px-1 text-right text-[11px] tabular-nums focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          className="h-6 w-14 rounded-md bg-background px-1.5 text-right text-[11px] tabular-nums focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           value={Math.round(kf.t)}
           title="Keyframe frame"
           onChange={(e) =>
@@ -192,7 +192,7 @@ function KeyframeToolbar() {
         />
       )}
       <select
-        className="h-6 rounded border border-input bg-background px-1 text-[11px] focus-visible:outline-none disabled:opacity-40"
+        className="h-6 rounded-md bg-background px-1.5 text-[11px] focus-visible:outline-none disabled:opacity-40"
         value={presetId}
         disabled={!multi && isLast}
         title={
