@@ -1,15 +1,14 @@
 "use client";
 
 import {
-  Clapperboard,
   Copy,
   Download,
   FileJson,
   FolderOpen,
+  Home,
   Package,
   Redo2,
   Undo2,
-  X,
 } from "lucide-react";
 import * as React from "react";
 
@@ -70,16 +69,22 @@ export function TopBar({ onOpenFile }: { onOpenFile: () => void }) {
           <ModeSwitcher />
         </div>
       )}
-      <div className="flex items-center gap-2 text-primary">
-        <Clapperboard size={18} />
-        <span className="text-sm font-semibold tracking-tight text-foreground">
-          Lottie Editor
-        </span>
-      </div>
-
       {doc && (
         <>
-          <div className="mx-2 h-5 w-px bg-border" />
+          <IconButton
+            label="Close and go home"
+            onClick={() => {
+              if (
+                window.confirm(
+                  "Close this animation? Unsaved exports will be lost.",
+                )
+              ) {
+                closeDoc();
+              }
+            }}
+          >
+            <Home size={15} />
+          </IconButton>
           <input
             className="h-7 w-48 rounded-lg bg-transparent px-2 text-xs text-foreground transition-colors hover:bg-card focus-visible:bg-card focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             value={fileName}
@@ -163,21 +168,6 @@ export function TopBar({ onOpenFile }: { onOpenFile: () => void }) {
                 />
               </PopoverContent>
             </Popover>
-
-            <IconButton
-              label="Close file"
-              onClick={() => {
-                if (
-                  window.confirm(
-                    "Close this animation? Unsaved exports will be lost.",
-                  )
-                ) {
-                  closeDoc();
-                }
-              }}
-            >
-              <X size={15} />
-            </IconButton>
           </>
         )}
       </div>
