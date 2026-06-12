@@ -73,6 +73,7 @@ export function TopBar({ onOpenFile }: { onOpenFile: () => void }) {
         <>
           <IconButton
             label="Close and go home"
+            className="rounded-full hover:bg-card"
             onClick={() => {
               if (
                 window.confirm(
@@ -93,10 +94,20 @@ export function TopBar({ onOpenFile }: { onOpenFile: () => void }) {
           />
 
           <div className="ml-2 flex items-center gap-0.5">
-            <IconButton label="Undo (⌘Z)" disabled={!canUndo} onClick={undo}>
+            <IconButton
+              label="Undo (⌘Z)"
+              className="rounded-full hover:bg-card"
+              disabled={!canUndo}
+              onClick={undo}
+            >
               <Undo2 size={15} />
             </IconButton>
-            <IconButton label="Redo (⇧⌘Z)" disabled={!canRedo} onClick={redo}>
+            <IconButton
+              label="Redo (⇧⌘Z)"
+              className="rounded-full hover:bg-card"
+              disabled={!canRedo}
+              onClick={redo}
+            >
               <Redo2 size={15} />
             </IconButton>
           </div>
@@ -107,7 +118,7 @@ export function TopBar({ onOpenFile }: { onOpenFile: () => void }) {
         <button
           type="button"
           onClick={onOpenFile}
-          className="inline-flex h-8 items-center gap-1.5 rounded-md px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+          className="inline-flex h-8 items-center gap-1.5 rounded-full px-3.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-card hover:text-foreground"
         >
           <FolderOpen size={14} />
           Open
