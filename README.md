@@ -8,6 +8,7 @@ A browser-based [Lottie animation](https://lottie.github.io/) editor — inspect
 
 - Drag & drop a `.json` anywhere, browse files, load from a URL, try the bundled example — or start from a blank composition
 - Shape tools: draw rectangles, ellipses and stars directly on the canvas (`V`/`R`/`E`/`S`); a click drops a default-sized shape
+- SVG import: drop or open an `.svg`, or paste SVG markup straight from Figma (⌘V) — paths (including arcs), rects, circles, ellipses, lines and polygons convert to editable shape layers with fills, strokes, opacity and fill rules preserved, group transforms baked in, auto-scaled to fit; pasting with nothing open starts a blank composition
 - Pen tool (`P`): click to place vertices, drag to pull out smooth curves (⇧ snaps 45°), live fill preview, click the first point to close (filled) or press Enter to finish an open stroke
 - Path editing: double-click a path layer to edit on canvas — drag vertices and tangents at pointer speed (no re-render per move), click the outline to insert a point, ⌫ deletes one, double-click a point to toggle corner/smooth, ⌥ breaks tangent pairs, ⇧ snaps to 45°
 - Path topology: open paths are first-class — **Cut here** severs a path at the selected point (a closed path opens there, an open path splits into two), and **Close path** rejoins open ends

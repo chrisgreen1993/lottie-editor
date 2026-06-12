@@ -10,9 +10,11 @@ import { ResizeHandle } from "@/components/editor/ResizeHandle";
 import { Timeline } from "@/components/editor/Timeline";
 import { Toasts } from "@/components/editor/Toasts";
 import { TopBar } from "@/components/editor/TopBar";
+import { blankDoc } from "@/lib/lottie/create";
 import { deleteKeyframes } from "@/lib/lottie/keyframes";
 import { parseLottie } from "@/lib/lottie/model";
 import { deleteLayer, duplicateLayer } from "@/lib/lottie/ops";
+import { svgToLayer } from "@/lib/lottie/svgImport";
 import { loadSession } from "@/lib/persistence";
 import { playerBridge } from "@/lib/playerBridge";
 import { useEditor } from "@/lib/store";
@@ -79,15 +81,68 @@ export function Editor() {
     [loadDoc, toast],
   );
 
+  /** Import SVG markup as a new shape layer (creating a blank composition
+   *  first when nothing is open). */
+  const openSvgText = React.useCallback(
+    (text: string, name: string) => {
+      const cleanName = name.replace(/\.svg$/i, "") || "svg";
+      const state = useEditor.getState();
+      if (!state.doc) state.loadDoc(blankDoc(), cleanName);
+      const doc = useEditor.getState().doc!;
+      const layer = svgToLayer(text, cleanName, doc.w, doc.h);
+      if (!layer) {
+        toast("No drawable shapes found in that SVG", "error");
+        return;
+      }
+      useEditor.getState().update((draft) => {
+        layer.ip = draft.ip;
+        layer.op = draft.op;
+        layer.ind = Math.max(0, ...draft.layers.map((l) => l.ind ?? 0)) + 1;
+        draft.layers.unshift(layer);
+      });
+      useEditor.getState().selectLayer(0);
+      toast(`Imported “${cleanName}” as a shape layer`);
+    },
+    [toast],
+  );
+
   const openFile = React.useCallback(
     (file: File) => {
+      const isSvg = /\.svg$/i.test(file.name) || file.type === "image/svg+xml";
       file
         .text()
-        .then((text) => openText(text, file.name))
+        .then((text) =>
+          isSvg ? openSvgText(text, file.name) : openText(text, file.name),
+        )
         .catch(() => toast("Couldn't read that file", "error"));
     },
-    [openText, toast],
+    [openText, openSvgText, toast],
   );
+
+  // Paste SVG markup (e.g. Figma's "Copy as SVG") or SVG files anywhere.
+  React.useEffect(() => {
+    const onPaste = (e: ClipboardEvent) => {
+      if (isEditableTarget(e.target)) return;
+      const text = e.clipboardData?.getData("text/plain") ?? "";
+      if (/<svg[\s>]/i.test(text)) {
+        e.preventDefault();
+        openSvgText(text, "pasted-svg");
+        return;
+      }
+      const file = Array.from(e.clipboardData?.files ?? []).find(
+        (f) => /\.svg$/i.test(f.name) || f.type === "image/svg+xml",
+      );
+      if (file) {
+        e.preventDefault();
+        file
+          .text()
+          .then((t) => openSvgText(t, file.name))
+          .catch(() => toast("Couldn't read the pasted SVG", "error"));
+      }
+    };
+    window.addEventListener("paste", onPaste);
+    return () => window.removeEventListener("paste", onPaste);
+  }, [openSvgText, toast]);
 
   // Keyboard shortcuts.
   React.useEffect(() => {
@@ -212,7 +267,7 @@ export function Editor() {
       <input
         ref={fileInputRef}
         type="file"
-        accept=".json,application/json"
+        accept=".json,.svg,application/json,image/svg+xml"
         className="hidden"
         onChange={(e) => {
           const file = e.target.files?.[0];
@@ -244,7 +299,7 @@ export function Editor() {
       {dragActive && doc && (
         <div className="pointer-events-none fixed inset-0 z-40 flex items-center justify-center bg-background/70 backdrop-blur-sm">
           <div className="rounded-xl border-2 border-dashed border-primary bg-card px-8 py-6 text-sm font-medium">
-            Drop to replace the current animation
+            Drop a Lottie .json to replace · an .svg adds a layer
           </div>
         </div>
       )}

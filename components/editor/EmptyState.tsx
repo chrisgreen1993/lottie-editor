@@ -94,10 +94,12 @@ export function EmptyState({
         >
           <UploadCloud size={28} className="text-muted-foreground" />
           <span className="text-sm font-medium">
-            {dragActive ? "Drop to open" : "Drop a Lottie .json anywhere"}
+            {dragActive
+              ? "Drop to open"
+              : "Drop a Lottie .json or .svg anywhere"}
           </span>
           <span className="text-xs text-muted-foreground">
-            or click to browse files
+            click to browse — or paste an SVG straight from Figma (⌘V)
           </span>
         </button>
 
