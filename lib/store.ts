@@ -28,7 +28,7 @@ const PANEL_LIMITS: Record<keyof PanelSizes, [number, number]> = {
 function loadPanelSizes(): PanelSizes {
   const defaults: PanelSizes = {
     layerPanelW: 240,
-    inspectorW: 288,
+    inspectorW: 240,
     timelineH: 256,
   };
   if (typeof window === "undefined") return defaults;

@@ -28,7 +28,7 @@ function ModeSwitcher() {
   const setEditorMode = useEditor((s) => s.setEditorMode);
   return (
     <div
-      className="flex items-center gap-0.5 rounded-lg border border-border bg-background p-0.5"
+      className="flex items-center gap-1 rounded-full bg-card p-0.5 shadow-lg"
       title="Switch between Design and Animate (Tab)"
     >
       {(["design", "animate"] as EditorMode[]).map((m) => (
@@ -37,7 +37,7 @@ function ModeSwitcher() {
           type="button"
           onClick={() => setEditorMode(m)}
           className={cn(
-            "rounded-md px-3.5 py-1 text-xs font-medium capitalize transition-colors",
+            "rounded-full px-3.5 py-1 text-xs font-medium capitalize transition-colors",
             mode === m
               ? "bg-secondary text-foreground"
               : "text-muted-foreground hover:text-foreground",
@@ -64,7 +64,7 @@ export function TopBar({ onOpenFile }: { onOpenFile: () => void }) {
   const [exportOpen, setExportOpen] = React.useState(false);
 
   return (
-    <header className="relative flex h-12 shrink-0 items-center gap-2 border-b border-border bg-card px-3">
+    <header className="relative flex h-12 shrink-0 items-center gap-2 px-4">
       {doc && (
         <div className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2">
           <ModeSwitcher />
@@ -114,7 +114,7 @@ export function TopBar({ onOpenFile }: { onOpenFile: () => void }) {
               <PopoverTrigger asChild>
                 <button
                   type="button"
-                  className="inline-flex h-8 items-center gap-1.5 rounded-md bg-primary px-3 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+                  className="inline-flex h-8 items-center gap-1.5 rounded-full bg-primary px-3.5 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90"
                 >
                   <Download size={14} />
                   Export

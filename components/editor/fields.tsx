@@ -107,7 +107,7 @@ export function NumberField({
       <input
         type="number"
         inputMode="decimal"
-        className="h-7 w-full rounded border border-input bg-background px-2 text-xs tabular-nums text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+        className="h-7 w-full rounded-lg bg-background px-2 text-xs tabular-nums text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
         value={text}
         step={step}
         min={min}

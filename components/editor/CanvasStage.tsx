@@ -527,12 +527,13 @@ export function CanvasStage() {
 
       {editorMode === "design" && (
         <div className="pointer-events-none absolute inset-y-0 left-3 flex items-center">
-          <div className="pointer-events-auto flex flex-col gap-0.5 rounded-lg border border-border bg-card/90 px-1 py-1.5 shadow-lg backdrop-blur">
+          <div className="pointer-events-auto flex flex-col gap-0.5 rounded-full bg-card/95 px-1 py-1.5 shadow-lg backdrop-blur">
             {TOOLS.map((t) => (
               <IconButton
                 key={t.id}
                 label={t.label}
                 active={tool === t.id}
+                className="rounded-full"
                 onClick={() => setTool(t.id)}
               >
                 {t.icon}
@@ -551,7 +552,7 @@ export function CanvasStage() {
       )}
 
       <div className="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center">
-        <div className="pointer-events-auto flex items-center gap-1 rounded-lg border border-border bg-card/90 px-2 py-1 shadow-lg backdrop-blur">
+        <div className="pointer-events-auto flex items-center gap-1 rounded-full bg-card/95 px-2.5 py-1 shadow-lg backdrop-blur">
           <IconButton label="Zoom out" onClick={() => zoomBy(1 / 1.25)}>
             <Minus size={14} />
           </IconButton>

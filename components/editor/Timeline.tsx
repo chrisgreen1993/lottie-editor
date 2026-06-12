@@ -606,10 +606,7 @@ function LayerTrack({
 
   return (
     <div
-      className={cn(
-        "relative h-7 border-b border-border/40",
-        selected && "bg-primary/10",
-      )}
+      className={cn("relative h-7 border-b border-border/40")}
       onClick={() => selectLayer(index)}
     >
       <div
@@ -618,7 +615,7 @@ function LayerTrack({
           layer.hd
             ? "border-border bg-muted"
             : selected
-              ? "border-primary/70 bg-primary/40"
+              ? "border-primary bg-primary"
               : "border-border bg-secondary",
         )}
         style={{ left: barLeft, width: Math.max(4, barRight - barLeft) }}
@@ -1140,7 +1137,7 @@ export function Timeline() {
 
   return (
     <div
-      className="relative flex shrink-0 flex-col border-t border-border bg-card"
+      className="relative flex shrink-0 flex-col overflow-hidden rounded-2xl bg-card"
       style={{ height }}
     >
       <ResizeHandle
@@ -1191,14 +1188,19 @@ export function Timeline() {
                       className={cn(
                         "flex h-7 w-[176px] shrink-0 items-center border-b border-r border-border/40",
                         selectedLayer === i
-                          ? "bg-primary/15 text-foreground"
+                          ? "bg-primary text-white"
                           : "text-muted-foreground hover:bg-accent/60 hover:text-foreground",
                         layer.hd && "opacity-50",
                       )}
                     >
                       <button
                         type="button"
-                        className="flex h-full w-5 shrink-0 items-center justify-center text-muted-foreground hover:text-foreground"
+                        className={cn(
+                          "flex h-full w-5 shrink-0 items-center justify-center",
+                          selectedLayer === i
+                            ? "text-white/80 hover:text-white"
+                            : "text-muted-foreground hover:text-foreground",
+                        )}
                         title={
                           isExpanded
                             ? "Collapse properties"

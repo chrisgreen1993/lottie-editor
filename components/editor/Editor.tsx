@@ -29,7 +29,6 @@ function PanelDivider({
   return (
     <ResizeHandle
       orientation="vertical"
-      className="-mx-0.5"
       onStart={() => {
         startRef.current = useEditor.getState().panels[panel];
       }}
@@ -225,7 +224,7 @@ export function Editor() {
       <TopBar onOpenFile={() => fileInputRef.current?.click()} />
 
       {doc ? (
-        <>
+        <div className="flex min-h-0 flex-1 flex-col gap-1 px-1 pb-1">
           <div className="flex min-h-0 flex-1">
             <LayerPanel />
             <PanelDivider panel="layerPanelW" grow={1} />
@@ -234,7 +233,7 @@ export function Editor() {
             <Inspector />
           </div>
           {editorMode === "animate" && <Timeline />}
-        </>
+        </div>
       ) : (
         <EmptyState
           onOpenFile={() => fileInputRef.current?.click()}
