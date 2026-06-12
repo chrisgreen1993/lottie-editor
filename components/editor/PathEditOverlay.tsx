@@ -3,10 +3,25 @@
 import { set as lset } from "lodash-es";
 import * as React from "react";
 
+import {
+  autoSmoothVertex,
+  constrain45,
+  isCornerVertex,
+  nearestOnSegment,
+  pathToD,
+  removeVertex,
+  segmentCount,
+  splitSegment,
+} from "@/lib/lottie/bezier";
 import { layerName } from "@/lib/lottie/model";
-import { collectEditablePaths, type EditablePath } from "@/lib/lottie/pathEdit";
+import {
+  collectEditablePaths,
+  type BezierPathData,
+  type EditablePath,
+} from "@/lib/lottie/pathEdit";
 import { playerBridge } from "@/lib/playerBridge";
 import { useEditor } from "@/lib/store";
+import { cn } from "@/lib/utils";
 
 function layerNode(index: number): SVGGElement | null {
   const anim = playerBridge.get() as unknown as {
@@ -15,7 +30,21 @@ function layerNode(index: number): SVGGElement | null {
   return anim?.renderer?.elements?.[index]?.layerElement ?? null;
 }
 
-/** Vertex / tangent editing overlay for the layer in path-edit mode. */
+function cloneData(data: BezierPathData): BezierPathData {
+  return {
+    v: data.v.map((p) => [...p] as [number, number]),
+    i: data.i.map((p) => [...p] as [number, number]),
+    o: data.o.map((p) => [...p] as [number, number]),
+    c: data.c,
+  };
+}
+
+/** Vertex / tangent editing overlay for the layer in path-edit mode.
+ *
+ *  Drags never commit per move — the new geometry is written straight into
+ *  the rendered SVG (when the layer has a single path) and into local state
+ *  for the overlay, then committed once on release. That keeps editing at
+ *  pointer speed instead of rebuilding lottie per move. */
 export function PathEditOverlay() {
   const doc = useEditor((s) => s.doc);
   const layerIndex = useEditor((s) => s.pathEdit);
@@ -29,6 +58,16 @@ export function PathEditOverlay() {
     path: number;
     vertex: number;
   } | null>(null);
+  /** Local geometry while a drag is in flight (no doc commits yet). */
+  const [live, setLive] = React.useState<{
+    path: number;
+    data: BezierPathData;
+  } | null>(null);
+  const lastVertexDownRef = React.useRef<{
+    time: number;
+    path: number;
+    vertex: number;
+  }>({ time: 0, path: -1, vertex: -1 });
 
   const paths = React.useMemo(
     () =>
@@ -37,6 +76,10 @@ export function PathEditOverlay() {
         : [],
     [doc, layerIndex, frame],
   );
+  const pathsRef = React.useRef(paths);
+  pathsRef.current = paths;
+  const selectedRef = React.useRef(selected);
+  selectedRef.current = selected;
 
   // The lottie instance rebuilds on a deferred animation frame after each
   // edit; re-render once it has so screen mapping stays accurate.
@@ -51,6 +94,29 @@ export function PathEditOverlay() {
     };
   }, [doc]);
 
+  // Backspace deletes the selected vertex (the global handler stands down
+  // while path editing is active).
+  React.useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Backspace" && e.key !== "Delete") return;
+      const target = e.target as HTMLElement | null;
+      if (target && ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName))
+        return;
+      const sel = selectedRef.current;
+      if (!sel) return;
+      const p = pathsRef.current[sel.path];
+      if (!p || p.animated) return;
+      const minVerts = p.data.c ? 3 : 2;
+      if (p.data.v.length <= minVerts) return;
+      e.preventDefault();
+      const next = removeVertex(p.data, sel.vertex);
+      update((draft) => lset(draft, p.dataPath, next));
+      setSelected(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [update]);
+
   if (!doc || layerIndex === null) return null;
   const layer = doc.layers[layerIndex];
   const node = layerNode(layerIndex);
@@ -61,9 +127,17 @@ export function PathEditOverlay() {
 
   const ctm = node?.getScreenCTM();
   const wrapperRect = wrapper?.getBoundingClientRect();
+  // Artwork preview is only safe when this layer renders a single path —
+  // lottie merges all shapes of a group into each style's `d`.
+  const singlePath = paths.length === 1;
+  const artworkEls: SVGPathElement[] =
+    singlePath && node ? Array.from(node.querySelectorAll("path")) : [];
 
   const screenMatrix = (p: EditablePath): DOMMatrix | null =>
     ctm ? DOMMatrix.fromMatrix(ctm).multiply(p.groupMatrix) : null;
+
+  const dataFor = (p: EditablePath, pi: number): BezierPathData =>
+    live && live.path === pi ? live.data : p.data;
 
   const toOverlay = (
     m: DOMMatrix,
@@ -72,6 +146,16 @@ export function PathEditOverlay() {
     if (!wrapperRect) return null;
     const sp = m.transformPoint(new DOMPoint(pt[0], pt[1]));
     return [sp.x - wrapperRect.left, sp.y - wrapperRect.top];
+  };
+
+  const commit = (p: EditablePath, data: BezierPathData) => {
+    update((draft) => lset(draft, p.dataPath, data));
+  };
+
+  const previewArtwork = (data: BezierPathData) => {
+    if (!artworkEls.length) return;
+    const d = pathToD(data);
+    for (const el of artworkEls) el.setAttribute("d", d);
   };
 
   const beginPointDrag = (
@@ -84,11 +168,43 @@ export function PathEditOverlay() {
     e.stopPropagation();
     e.preventDefault();
     if (p.animated) return;
+
+    // Manual double-press: toggle corner ↔ smooth (preventDefault on
+    // pointerdown suppresses the native dblclick).
+    if (part === "v") {
+      const last = lastVertexDownRef.current;
+      const now = performance.now();
+      const isDouble =
+        now - last.time < 350 &&
+        last.path === pathIdx &&
+        last.vertex === vertexIdx;
+      lastVertexDownRef.current = {
+        time: now,
+        path: pathIdx,
+        vertex: vertexIdx,
+      };
+      if (isDouble) {
+        const base = cloneData(p.data);
+        const next = isCornerVertex(base, vertexIdx)
+          ? autoSmoothVertex(base, vertexIdx)
+          : (() => {
+              base.i[vertexIdx] = [0, 0];
+              base.o[vertexIdx] = [0, 0];
+              return base;
+            })();
+        commit(p, next);
+        return;
+      }
+    }
+
     setSelected({ path: pathIdx, vertex: vertexIdx });
     const m = screenMatrix(p);
     if (!m) return;
     const inv = m.inverse();
-    const vertex = p.data.v[vertexIdx];
+    const base = cloneData(p.data);
+    const baseVertex = [...base.v[vertexIdx]] as [number, number];
+    let lastData: BezierPathData | null = null;
+
     const target = e.currentTarget as Element;
     try {
       target.setPointerCapture(e.pointerId);
@@ -96,29 +212,64 @@ export function PathEditOverlay() {
       // Synthetic or already-released pointers can lack an active id.
     }
     const onMove = (ev: PointerEvent) => {
-      const local = inv.transformPoint(new DOMPoint(ev.clientX, ev.clientY));
-      update(
-        (draft) => {
-          if (part === "v") {
-            lset(draft, [...p.dataPath, "v", vertexIdx], [local.x, local.y]);
-          } else {
-            // Tangents are stored relative to their vertex.
-            lset(
-              draft,
-              [...p.dataPath, part, vertexIdx],
-              [local.x - vertex[0], local.y - vertex[1]],
-            );
-          }
-        },
-        { coalesceKey: `path-${p.dataPath.join(".")}-${part}-${vertexIdx}` },
-      );
+      const lp = inv.transformPoint(new DOMPoint(ev.clientX, ev.clientY));
+      let local: [number, number] = [lp.x, lp.y];
+      const data = cloneData(base);
+      if (part === "v") {
+        if (ev.shiftKey) local = constrain45(baseVertex, local);
+        data.v[vertexIdx] = local;
+      } else {
+        if (ev.shiftKey) {
+          local = constrain45(baseVertex, local);
+        }
+        const rel: [number, number] = [
+          local[0] - baseVertex[0],
+          local[1] - baseVertex[1],
+        ];
+        data[part][vertexIdx] = rel;
+        // Figma behavior: handles stay mirrored unless ⌥ breaks them.
+        if (!ev.altKey) {
+          const opposite = part === "i" ? "o" : "i";
+          data[opposite][vertexIdx] = [-rel[0], -rel[1]];
+        }
+      }
+      lastData = data;
+      setLive({ path: pathIdx, data });
+      previewArtwork(data);
     };
     const onUp = () => {
       target.removeEventListener("pointermove", onMove as EventListener);
       target.removeEventListener("pointerup", onUp);
+      setLive(null);
+      if (lastData) commit(p, lastData);
     };
     target.addEventListener("pointermove", onMove as EventListener);
     target.addEventListener("pointerup", onUp);
+  };
+
+  /** Click on the path outline inserts a vertex at that spot. */
+  const onSkeletonDown = (
+    e: React.PointerEvent,
+    p: EditablePath,
+    pathIdx: number,
+  ) => {
+    e.stopPropagation();
+    e.preventDefault();
+    if (p.animated) return;
+    const m = screenMatrix(p);
+    if (!m) return;
+    const inv = m.inverse();
+    const lp = inv.transformPoint(new DOMPoint(e.clientX, e.clientY));
+    const data = dataFor(p, pathIdx);
+    let best: { j: number; t: number; dist: number } | null = null;
+    for (let j = 0; j < segmentCount(data); j++) {
+      const hit = nearestOnSegment(data, j, [lp.x, lp.y]);
+      if (!best || hit.dist < best.dist) best = { j, t: hit.t, dist: hit.dist };
+    }
+    if (!best) return;
+    const { data: next, index } = splitSegment(data, best.j, best.t);
+    commit(p, next);
+    setSelected({ path: pathIdx, vertex: index });
   };
 
   const hasAnimated = paths.some((p) => p.animated);
@@ -131,8 +282,9 @@ export function PathEditOverlay() {
     >
       <div className="pointer-events-auto absolute left-1/2 top-2 z-10 flex -translate-x-1/2 items-center gap-2 rounded-md border border-border bg-card/95 px-2.5 py-1 text-[11px] shadow-lg backdrop-blur">
         <span className="text-muted-foreground">
-          Editing paths · {layerName(layer, layerIndex)}
-          {hasAnimated && " · animated paths are locked"}
+          {layerName(layer, layerIndex)} · click outline to add a point ·
+          double-click a point for corner/smooth · ⌥ breaks handles · ⌫ deletes
+          {hasAnimated && " · animated paths locked"}
         </span>
         <button
           type="button"
@@ -143,17 +295,57 @@ export function PathEditOverlay() {
         </button>
       </div>
 
+      {/* Path skeletons: visible outline + a wide invisible hit stroke. */}
+      <svg className="absolute inset-0 h-full w-full overflow-visible">
+        {paths.map((p, pi) => {
+          const m = screenMatrix(p);
+          if (!m || !wrapperRect) return null;
+          const d = pathToD(dataFor(p, pi), (pt) => {
+            const sp = m.transformPoint(new DOMPoint(pt[0], pt[1]));
+            return [sp.x - wrapperRect.left, sp.y - wrapperRect.top];
+          });
+          return (
+            <g key={pi}>
+              <path
+                d={d}
+                fill="none"
+                className={
+                  p.animated
+                    ? "stroke-muted-foreground/50"
+                    : "stroke-primary/70"
+                }
+                strokeWidth={1}
+              />
+              {!p.animated && (
+                <path
+                  d={d}
+                  fill="none"
+                  stroke="transparent"
+                  strokeWidth={10}
+                  className="pointer-events-auto cursor-copy"
+                  style={{ pointerEvents: "stroke" }}
+                  onPointerDown={(e) => onSkeletonDown(e, p, pi)}
+                >
+                  <title>Click to insert a point</title>
+                </path>
+              )}
+            </g>
+          );
+        })}
+      </svg>
+
       {paths.map((p, pi) => {
         const m = screenMatrix(p);
         if (!m) return null;
-        return p.data.v.map((vert, vi) => {
+        const data = dataFor(p, pi);
+        return data.v.map((vert, vi) => {
           const pos = toOverlay(m, vert);
           if (!pos) return null;
           const isSel = selected?.path === pi && selected.vertex === vi;
           const tangents =
             isSel && !p.animated
               ? (["i", "o"] as const).map((part) => {
-                  const rel = p.data[part][vi] ?? [0, 0];
+                  const rel = data[part][vi] ?? [0, 0];
                   if (Math.abs(rel[0]) < 0.01 && Math.abs(rel[1]) < 0.01)
                     return null;
                   const hpos = toOverlay(m, [
@@ -182,7 +374,10 @@ export function PathEditOverlay() {
                       <div
                         className="pointer-events-auto absolute h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 cursor-move rounded-full border border-primary bg-background"
                         style={{ left: t.hpos[0], top: t.hpos[1] }}
-                        title={t.part === "i" ? "In tangent" : "Out tangent"}
+                        title={
+                          (t.part === "i" ? "In tangent" : "Out tangent") +
+                          " — ⌥ drags it alone, ⇧ snaps 45°"
+                        }
                         onPointerDown={(e) =>
                           beginPointDrag(e, p, pi, vi, t.part)
                         }
@@ -191,18 +386,19 @@ export function PathEditOverlay() {
                   ),
               )}
               <div
-                className={
+                className={cn(
+                  "absolute -translate-x-1/2 -translate-y-1/2 rounded-[2px]",
                   p.animated
-                    ? "pointer-events-none absolute h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-[2px] border border-muted-foreground bg-muted opacity-60"
+                    ? "pointer-events-none h-2 w-2 border border-muted-foreground bg-muted opacity-60"
                     : isSel
-                      ? "pointer-events-auto absolute h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 cursor-move rounded-[2px] border-2 border-primary bg-background"
-                      : "pointer-events-auto absolute h-2 w-2 -translate-x-1/2 -translate-y-1/2 cursor-move rounded-[2px] border border-primary bg-primary/70 hover:scale-125"
-                }
+                      ? "pointer-events-auto h-2.5 w-2.5 cursor-move border-2 border-primary bg-background"
+                      : "pointer-events-auto h-2 w-2 cursor-move border border-primary bg-primary/70 hover:scale-125",
+                )}
                 style={{ left: pos[0], top: pos[1] }}
                 title={
                   p.animated
                     ? `${p.name} — animated path (locked)`
-                    : `${p.name} · vertex ${vi + 1} — drag to move, click for tangents`
+                    : `${p.name} · point ${vi + 1} — drag to move (⇧ snaps 45°), double-click toggles corner/smooth, ⌫ deletes`
                 }
                 onPointerDown={(e) => beginPointDrag(e, p, pi, vi, "v")}
               />

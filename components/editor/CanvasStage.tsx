@@ -22,6 +22,7 @@ import {
   type PenVertex,
   type ShapeKind,
 } from "@/lib/lottie/create";
+import { constrain45 } from "@/lib/lottie/bezier";
 import { collapseSingleKeyframes } from "@/lib/lottie/keyframes";
 import { hasEditablePath } from "@/lib/lottie/pathEdit";
 import { playerBridge } from "@/lib/playerBridge";
@@ -258,10 +259,13 @@ export function CanvasStage() {
     e.stopPropagation();
     const wrapper = e.currentTarget as HTMLElement;
     const rect = wrapper.getBoundingClientRect();
-    const docPt: [number, number] = [
+    let docPt: [number, number] = [
       (e.clientX - rect.left) / scale,
       (e.clientY - rect.top) / scale,
     ];
+    if (e.shiftKey && penPoints.length > 0) {
+      docPt = constrain45(penPoints[penPoints.length - 1].v, docPt);
+    }
 
     // Closing click on the first vertex?
     if (penPoints.length >= 3) {
@@ -285,8 +289,13 @@ export function CanvasStage() {
     }
     const onMove = (ev: PointerEvent) => {
       // Dragging pulls out a smooth (mirrored) tangent pair.
-      const ox = (ev.clientX - rect.left) / scale - docPt[0];
-      const oy = (ev.clientY - rect.top) / scale - docPt[1];
+      let tip: [number, number] = [
+        (ev.clientX - rect.left) / scale,
+        (ev.clientY - rect.top) / scale,
+      ];
+      if (ev.shiftKey) tip = constrain45(docPt, tip);
+      const ox = tip[0] - docPt[0];
+      const oy = tip[1] - docPt[1];
       setPenPoints((prev) =>
         prev.map((p, i) =>
           i === index ? { ...p, o: [ox, oy], i: [-ox, -oy] } : p,
@@ -440,10 +449,14 @@ export function CanvasStage() {
               tool === "pen" && penPoints.length > 0
                 ? (e) => {
                     const rect = e.currentTarget.getBoundingClientRect();
-                    setPenCursor([
+                    let pt: [number, number] = [
                       (e.clientX - rect.left) / scale,
                       (e.clientY - rect.top) / scale,
-                    ]);
+                    ];
+                    if (e.shiftKey) {
+                      pt = constrain45(penPoints[penPoints.length - 1].v, pt);
+                    }
+                    setPenCursor(pt);
                   }
                 : undefined
             }
@@ -478,6 +491,13 @@ export function CanvasStage() {
             )}
             {tool === "pen" && penPoints.length > 0 && (
               <svg className="pointer-events-none absolute inset-0 h-full w-full overflow-visible">
+                {penPoints.length >= 2 && (
+                  <path
+                    d={`${penPathD(penPoints, penCursor, scale)} Z`}
+                    className="fill-primary/10"
+                    stroke="none"
+                  />
+                )}
                 <path
                   d={penPathD(penPoints, penCursor, scale)}
                   fill="none"

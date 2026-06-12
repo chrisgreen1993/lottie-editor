@@ -128,6 +128,8 @@ export function Editor() {
         return;
       }
       if (e.key === "Delete" || e.key === "Backspace") {
+        // Path editing owns Backspace (vertex deletion) while active.
+        if (state.pathEdit !== null) return;
         // Selected keyframes take precedence over the selected layer.
         if (state.selectedKeyframes.length > 0) {
           e.preventDefault();
