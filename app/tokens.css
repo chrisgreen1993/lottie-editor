@@ -1,0 +1,229 @@
+/* =============================================================================
+ * tokens.css — the single source of truth for every visual value.
+ *
+ * THREE LAYERS:
+ *   Layer 1  --ds-*      Upstream design-system PRIMITIVES (raw values live
+ *                        here and ONLY here). Swappable for a real DS later.
+ *   Layer 2  semantic    Project ALIASES that reference Layer 1 with a literal
+ *                        fallback, e.g. --color-text: var(--ds-text, #...).
+ *                        Components reference these, never Layer 1.
+ *   Layer 3  components   The .tsx / .css files. They reference Layer 2 only
+ *                        (directly, or via Tailwind utilities that map to it).
+ *
+ * Colors are stored as HSL CHANNELS ("H S% L%") so Tailwind can wrap them in
+ * hsl(var(--x)). Read app/specs/tokens/token-reference.md before editing.
+ * ========================================================================== */
+
+:root,
+.dark {
+  /* ---------------------------------------------------------------------------
+   * LAYER 1 — design-system primitives (--ds-*)
+   * ------------------------------------------------------------------------ */
+
+  /* Neutral ramp (hue 240, the editor chrome) — channel triplets */
+  --ds-neutral-950: 240 6% 7%;
+  --ds-neutral-900: 240 5% 9%;
+  --ds-neutral-880: 240 5% 10%;
+  --ds-neutral-850: 240 5% 14%;
+  --ds-neutral-820: 240 11% 16%;
+  --ds-neutral-800: 240 10% 18%;
+  --ds-neutral-720: 240 5% 17%;
+  --ds-neutral-680: 240 5% 22%;
+  --ds-neutral-400: 240 5% 58%;
+  --ds-neutral-100: 240 6% 88%;
+  --ds-neutral-080: 240 6% 92%;
+  --ds-neutral-040: 240 6% 95%;
+
+  /* Brand + status hues — channel triplets */
+  --ds-sky-500: 199 89% 56%; /* primary / interactive */
+  --ds-red-500: 0 72% 56%; /* destructive */
+  --ds-amber-400: 43 96% 56%; /* keyframe accent channels */
+  --ds-amber-400-hex: #fbbf24; /* keyframe accent, full color */
+
+  /* Full-color primitives (used where a complete color, not a channel
+   * triplet, is required — canvas surfaces & sample swatches). */
+  --ds-checker-base: #2a2a2e;
+  --ds-checker-tile: #3a3a40;
+  --ds-canvas-dark: #18181b;
+  --ds-canvas-light: #fafafa;
+  --ds-white: #ffffff;
+
+  /* Spacing primitives — 4px base step */
+  --ds-space-0: 0px;
+  --ds-space-1: 2px;
+  --ds-space-2: 4px;
+  --ds-space-3: 8px;
+  --ds-space-4: 12px;
+  --ds-space-5: 16px;
+  --ds-space-6: 24px;
+  --ds-space-7: 32px;
+  --ds-space-8: 48px;
+
+  /* Typography primitives */
+  --ds-font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --ds-font-mono: ui-monospace, "SF Mono", Menlo, monospace;
+
+  --ds-text-3xs: 0.5625rem; /* 9px  — timeline ruler ticks */
+  --ds-text-2xs: 0.625rem; /* 10px — meta / section labels */
+  --ds-text-xs2: 0.6875rem; /* 11px — track labels / transport */
+  --ds-text-xs: 0.75rem; /* 12px — primary inspector / controls */
+  --ds-text-sm: 0.875rem; /* 14px — top bar title / empty-state body */
+  --ds-text-base: 1rem; /* 16px */
+  --ds-text-lg: 1.5rem; /* 24px — empty-state heading */
+
+  --ds-weight-regular: 400;
+  --ds-weight-medium: 500;
+  --ds-weight-semibold: 600;
+
+  --ds-leading-none: 1;
+  --ds-leading-tight: 1.25;
+  --ds-leading-normal: 1.5;
+
+  /* Radius primitives */
+  --ds-radius-xs: 2px;
+  --ds-radius-sm: 4px;
+  --ds-radius-md: 6px;
+  --ds-radius-lg: 8px;
+  --ds-radius-xl: 12px;
+  --ds-radius-2xl: 16px;
+  --ds-radius-full: 9999px;
+
+  /* Elevation primitives (shadows) */
+  --ds-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --ds-shadow-md: 0 2px 6px 0 rgb(0 0 0 / 0.35);
+  --ds-shadow-lg: 0 6px 16px 0 rgb(0 0 0 / 0.35);
+  --ds-shadow-2xl: 0 12px 32px 0 rgb(0 0 0 / 0.45);
+
+  /* Z-index primitives — layering scale */
+  --ds-z-base: 0;
+  --ds-z-raised: 10; /* playhead, snap guide, selected diamond */
+  --ds-z-sticky: 20; /* timeline resize handle */
+  --ds-z-overlay: 40; /* drag-to-replace scrim */
+  --ds-z-popover: 50; /* toasts, popovers */
+
+  /* Motion primitives */
+  --ds-duration-fast: 120ms;
+  --ds-duration-base: 150ms;
+  --ds-duration-slow: 200ms;
+  --ds-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Component sizing primitives */
+  --ds-size-scrollbar: 10px;
+  --ds-size-scrollbar-radius: 5px;
+  --ds-size-scrollbar-border: 2px;
+  --ds-size-colorpicker-w: 196px;
+  --ds-size-colorpicker-h: 160px;
+  --ds-size-colorpicker-pointer: 14px;
+  --ds-size-track-label: 176px; /* timeline left gutter */
+
+  /* ---------------------------------------------------------------------------
+   * LAYER 2 — semantic project aliases (reference Layer 1 + literal fallback)
+   *
+   * Color channel aliases keep the names Tailwind already consumes via
+   * hsl(var(--x)); see tailwind.config.ts. Adding a real DS later means only
+   * swapping the --ds-* fallbacks below.
+   * ------------------------------------------------------------------------ */
+
+  --background: var(--ds-neutral-950, 240 6% 7%);
+  --foreground: var(--ds-neutral-080, 240 6% 92%);
+
+  --card: var(--ds-neutral-880, 240 5% 10%);
+  --card-foreground: var(--ds-neutral-080, 240 6% 92%);
+
+  --popover: var(--ds-neutral-900, 240 5% 9%);
+  --popover-foreground: var(--ds-neutral-080, 240 6% 92%);
+
+  --primary: var(--ds-sky-500, 199 89% 56%);
+  --primary-foreground: var(--ds-neutral-950, 240 6% 7%);
+
+  --secondary: var(--ds-neutral-820, 240 11% 16%);
+  --secondary-foreground: var(--ds-neutral-100, 240 6% 88%);
+
+  --muted: var(--ds-neutral-850, 240 5% 14%);
+  --muted-foreground: var(--ds-neutral-400, 240 5% 58%);
+
+  --accent: var(--ds-neutral-800, 240 10% 18%);
+  --accent-foreground: var(--ds-neutral-080, 240 6% 92%);
+
+  --destructive: var(--ds-red-500, 0 72% 56%);
+  --destructive-foreground: var(--ds-neutral-040, 240 6% 95%);
+
+  --border: var(--ds-neutral-720, 240 5% 17%);
+  --input: var(--ds-neutral-680, 240 5% 22%);
+  --ring: var(--ds-sky-500, 199 89% 56%);
+
+  /* Keyframe / timeline accent (full color, not a channel triplet) */
+  --color-keyframe: var(--ds-amber-400-hex, #fbbf24);
+
+  /* Canvas surfaces */
+  --color-checker-base: var(--ds-checker-base, #2a2a2e);
+  --color-checker-tile: var(--ds-checker-tile, #3a3a40);
+  --color-canvas-dark: var(--ds-canvas-dark, #18181b);
+  --color-canvas-light: var(--ds-canvas-light, #fafafa);
+  --color-on-fill: var(--ds-white, #ffffff); /* text/icon on a filled chip */
+
+  /* Spacing aliases */
+  --space-none: var(--ds-space-0, 0px);
+  --space-3xs: var(--ds-space-1, 2px);
+  --space-2xs: var(--ds-space-2, 4px);
+  --space-xs: var(--ds-space-3, 8px);
+  --space-sm: var(--ds-space-4, 12px);
+  --space-md: var(--ds-space-5, 16px);
+  --space-lg: var(--ds-space-6, 24px);
+  --space-xl: var(--ds-space-7, 32px);
+  --space-2xl: var(--ds-space-8, 48px);
+
+  /* Typography aliases */
+  --font-sans: var(--ds-font-sans);
+  --font-mono: var(--ds-font-mono);
+
+  --text-ruler: var(--ds-text-3xs, 0.5625rem); /* 9px */
+  --text-meta: var(--ds-text-2xs, 0.625rem); /* 10px */
+  --text-label: var(--ds-text-xs2, 0.6875rem); /* 11px */
+  --text-body: var(--ds-text-xs, 0.75rem); /* 12px */
+  --text-title: var(--ds-text-sm, 0.875rem); /* 14px */
+  --text-heading: var(--ds-text-lg, 1.5rem); /* 24px */
+
+  --weight-regular: var(--ds-weight-regular, 400);
+  --weight-medium: var(--ds-weight-medium, 500);
+  --weight-semibold: var(--ds-weight-semibold, 600);
+
+  --leading-none: var(--ds-leading-none, 1);
+  --leading-tight: var(--ds-leading-tight, 1.25);
+  --leading-normal: var(--ds-leading-normal, 1.5);
+
+  /* Radius aliases — `--radius` is the Tailwind anchor (lg/md/sm derive). */
+  --radius: var(--ds-radius-lg, 0.5rem);
+  --radius-pill: var(--ds-radius-full, 9999px);
+  --radius-panel: var(--ds-radius-2xl, 16px);
+  --radius-control: var(--ds-radius-lg, 8px);
+  --radius-chip: var(--ds-radius-md, 6px);
+  --radius-handle: var(--ds-radius-xs, 2px);
+
+  /* Elevation aliases */
+  --shadow-sm: var(--ds-shadow-sm);
+  --shadow-md: var(--ds-shadow-md);
+  --shadow-panel: var(--ds-shadow-lg);
+  --shadow-canvas: var(--ds-shadow-2xl);
+
+  /* Z-index aliases */
+  --z-raised: var(--ds-z-raised, 10);
+  --z-sticky: var(--ds-z-sticky, 20);
+  --z-overlay: var(--ds-z-overlay, 40);
+  --z-popover: var(--ds-z-popover, 50);
+
+  /* Motion aliases */
+  --duration-fast: var(--ds-duration-fast, 120ms);
+  --duration-base: var(--ds-duration-base, 150ms);
+  --duration-slow: var(--ds-duration-slow, 200ms);
+  --ease-standard: var(--ds-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
+
+  /* Component-sizing aliases */
+  --size-scrollbar: var(--ds-size-scrollbar, 10px);
+  --size-scrollbar-radius: var(--ds-size-scrollbar-radius, 5px);
+  --size-scrollbar-border: var(--ds-size-scrollbar-border, 2px);
+  --size-colorpicker-w: var(--ds-size-colorpicker-w, 196px);
+  --size-colorpicker-h: var(--ds-size-colorpicker-h, 160px);
+  --size-colorpicker-pointer: var(--ds-size-colorpicker-pointer, 14px);
+  --size-track-label: var(--ds-size-track-label, 176px);
+}

@@ -1,41 +1,12 @@
+@import "./tokens.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  :root,
-  .dark {
-    --background: 240 6% 7%;
-    --foreground: 240 6% 92%;
-
-    --card: 240 5% 10%;
-    --card-foreground: 240 6% 92%;
-
-    --popover: 240 5% 9%;
-    --popover-foreground: 240 6% 92%;
-
-    --primary: 199 89% 56%;
-    --primary-foreground: 240 6% 7%;
-
-    --secondary: 240 11% 16%;
-    --secondary-foreground: 240 6% 88%;
-
-    --muted: 240 5% 14%;
-    --muted-foreground: 240 5% 58%;
-
-    --accent: 240 10% 18%;
-    --accent-foreground: 240 6% 92%;
-
-    --destructive: 0 72% 56%;
-    --destructive-foreground: 240 6% 95%;
-
-    --border: 240 5% 17%;
-    --input: 240 5% 22%;
-    --ring: 199 89% 56%;
-
-    --radius: 0.5rem;
-  }
-}
+/* All design values come from tokens.css (Layer 1 primitives → Layer 2
+ * aliases). This file only wires Layer 2 aliases into base styles and the
+ * two custom utilities. No raw visual values should appear below. */
 
 @layer base {
   * {
@@ -56,7 +27,7 @@
   input[type="number"]::-webkit-inner-spin-button,
   input[type="number"]::-webkit-outer-spin-button {
     -webkit-appearance: none;
-    margin: 0;
+    margin: var(--space-none);
   }
   input[type="number"] {
     -moz-appearance: textfield;
@@ -64,16 +35,16 @@
   }
 
   ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+    width: var(--size-scrollbar);
+    height: var(--size-scrollbar);
   }
   ::-webkit-scrollbar-track {
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
     background: hsl(var(--secondary));
-    border-radius: 5px;
-    border: 2px solid hsl(var(--background));
+    border-radius: var(--size-scrollbar-radius);
+    border: var(--size-scrollbar-border) solid hsl(var(--background));
   }
   ::-webkit-scrollbar-thumb:hover {
     background: hsl(var(--accent));
@@ -86,26 +57,30 @@
 @layer utilities {
   /* Transparency checkerboard for the canvas. */
   .bg-checker {
-    background-color: #2a2a2e;
-    background-image: linear-gradient(45deg, #3a3a40 25%, transparent 25%),
-      linear-gradient(-45deg, #3a3a40 25%, transparent 25%),
-      linear-gradient(45deg, transparent 75%, #3a3a40 75%),
-      linear-gradient(-45deg, transparent 75%, #3a3a40 75%);
-    background-size: 16px 16px;
+    background-color: var(--color-checker-base);
+    background-image: linear-gradient(
+        45deg,
+        var(--color-checker-tile) 25%,
+        transparent 25%
+      ),
+      linear-gradient(-45deg, var(--color-checker-tile) 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, var(--color-checker-tile) 75%),
+      linear-gradient(-45deg, transparent 75%, var(--color-checker-tile) 75%);
+    background-size: var(--space-md) var(--space-md);
     background-position:
-      0 0,
-      0 8px,
-      8px -8px,
-      -8px 0;
+      var(--space-none) var(--space-none),
+      var(--space-none) var(--space-xs),
+      var(--space-xs) calc(-1 * var(--space-xs)),
+      calc(-1 * var(--space-xs)) var(--space-none);
   }
 }
 
 /* react-colorful sizing tweaks */
 .react-colorful {
-  width: 196px !important;
-  height: 160px !important;
+  width: var(--size-colorpicker-w) !important;
+  height: var(--size-colorpicker-h) !important;
 }
 .react-colorful__pointer {
-  width: 14px !important;
-  height: 14px !important;
+  width: var(--size-colorpicker-pointer) !important;
+  height: var(--size-colorpicker-pointer) !important;
 }

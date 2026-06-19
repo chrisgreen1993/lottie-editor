@@ -87,7 +87,7 @@ function LayerRow({
     <div
       className={cn(
         "group relative flex h-8 cursor-pointer select-none items-center gap-1.5 border-b border-border/50 px-2 text-xs transition-colors",
-        selected ? "bg-primary text-white" : "hover:bg-accent/60",
+        selected ? "bg-primary text-on-fill" : "hover:bg-accent/60",
         hidden && "opacity-50",
         dropEdge === "above" && "shadow-[inset_0_2px_0_hsl(var(--primary))]",
         dropEdge === "below" && "shadow-[inset_0_-2px_0_hsl(var(--primary))]",
@@ -129,7 +129,7 @@ function LayerRow({
         className={cn(
           "shrink-0",
           selected
-            ? "text-white/80 hover:text-white"
+            ? "text-on-fill/80 hover:text-on-fill"
             : "text-muted-foreground hover:text-foreground",
         )}
         onClick={(e) => {
@@ -142,7 +142,7 @@ function LayerRow({
       <span
         className={cn(
           "shrink-0",
-          selected ? "text-white" : "text-muted-foreground",
+          selected ? "text-on-fill" : "text-muted-foreground",
         )}
       >
         <LayerIcon ty={layer.ty} />
@@ -184,7 +184,7 @@ function LayerRow({
           className={cn(
             "rounded p-0.5 disabled:opacity-30",
             selected
-              ? "text-white/80 hover:text-white"
+              ? "text-on-fill/80 hover:text-on-fill"
               : "text-muted-foreground hover:text-foreground",
           )}
           onClick={() => update((draft) => moveLayer(draft, index, index - 1))}
@@ -198,7 +198,7 @@ function LayerRow({
           className={cn(
             "rounded p-0.5 disabled:opacity-30",
             selected
-              ? "text-white/80 hover:text-white"
+              ? "text-on-fill/80 hover:text-on-fill"
               : "text-muted-foreground hover:text-foreground",
           )}
           onClick={() => update((draft) => moveLayer(draft, index, index + 1))}
@@ -211,7 +211,7 @@ function LayerRow({
           className={cn(
             "rounded p-0.5",
             selected
-              ? "text-white/80 hover:text-white"
+              ? "text-on-fill/80 hover:text-on-fill"
               : "text-muted-foreground hover:text-foreground",
           )}
           onClick={() => update((draft) => duplicateLayer(draft, index))}
@@ -224,7 +224,7 @@ function LayerRow({
           className={cn(
             "rounded p-0.5",
             selected
-              ? "text-white/80 hover:text-white"
+              ? "text-on-fill/80 hover:text-on-fill"
               : "text-muted-foreground hover:text-destructive",
           )}
           onClick={() => update((draft) => deleteLayer(draft, index))}
@@ -249,7 +249,7 @@ export function LayerPanel() {
       <div className="flex h-9 shrink-0 items-center gap-2 border-b border-border px-3">
         <Layers size={13} className="text-muted-foreground" />
         <span className="text-xs font-semibold">Layers</span>
-        <span className="ml-auto text-[10px] tabular-nums text-muted-foreground">
+        <span className="ml-auto text-meta tabular-nums text-muted-foreground">
           {doc.layers.length}
         </span>
       </div>

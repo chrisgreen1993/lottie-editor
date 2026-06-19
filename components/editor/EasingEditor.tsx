@@ -132,7 +132,7 @@ export function EasingEditor({
         cx={ix}
         cy={iy}
         r={6}
-        className="cursor-grab fill-amber-400 stroke-background active:cursor-grabbing"
+        className="cursor-grab fill-keyframe stroke-background active:cursor-grabbing"
         strokeWidth={2}
         onPointerDown={startDrag("i")}
       />

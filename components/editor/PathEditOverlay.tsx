@@ -324,7 +324,7 @@ export function PathEditOverlay() {
       className="pointer-events-none absolute inset-0"
       data-canvas-overlay
     >
-      <div className="pointer-events-auto absolute left-1/2 top-2 z-10 flex -translate-x-1/2 items-center gap-2 rounded-md border border-border bg-card/95 px-2.5 py-1 text-[11px] shadow-lg backdrop-blur">
+      <div className="pointer-events-auto absolute left-1/2 top-2 z-10 flex -translate-x-1/2 items-center gap-2 rounded-md border border-border bg-card/95 px-2.5 py-1 text-label shadow-lg backdrop-blur">
         <span className="text-muted-foreground">
           {layerName(layer, layerIndex)} · click outline to add a point ·
           double-click a point for corner/smooth · ⌥ breaks handles · ⌫ deletes
@@ -334,7 +334,7 @@ export function PathEditOverlay() {
           <>
             <button
               type="button"
-              className="rounded bg-secondary px-1.5 py-0.5 text-[10px] font-medium hover:bg-secondary/80 disabled:opacity-40"
+              className="rounded bg-secondary px-1.5 py-0.5 text-meta font-medium hover:bg-secondary/80 disabled:opacity-40"
               disabled={
                 !dataFor(selectedPath, selected.path).c &&
                 (selected.vertex === 0 ||
@@ -349,7 +349,7 @@ export function PathEditOverlay() {
             {!dataFor(selectedPath, selected.path).c && (
               <button
                 type="button"
-                className="rounded bg-secondary px-1.5 py-0.5 text-[10px] font-medium hover:bg-secondary/80"
+                className="rounded bg-secondary px-1.5 py-0.5 text-meta font-medium hover:bg-secondary/80"
                 title="Join the open ends with a closing segment"
                 onClick={closeSelected}
               >
@@ -360,7 +360,7 @@ export function PathEditOverlay() {
         )}
         <button
           type="button"
-          className="rounded bg-secondary px-1.5 py-0.5 text-[10px] font-medium hover:bg-secondary/80"
+          className="rounded bg-secondary px-1.5 py-0.5 text-meta font-medium hover:bg-secondary/80"
           onClick={() => setPathEdit(null)}
         >
           Done (Esc)

@@ -413,11 +413,11 @@ export function CanvasStage() {
 
   const stageBgStyle: React.CSSProperties =
     canvasBg === "doc"
-      ? { backgroundColor: doc.bg || "#ffffff" }
+      ? { backgroundColor: doc.bg || "var(--color-on-fill)" }
       : canvasBg === "dark"
-        ? { backgroundColor: "#18181b" }
+        ? { backgroundColor: "var(--color-canvas-dark)" }
         : canvasBg === "light"
-          ? { backgroundColor: "#fafafa" }
+          ? { backgroundColor: "var(--color-canvas-light)" }
           : {};
 
   return (
@@ -544,7 +544,7 @@ export function CanvasStage() {
       )}
       {tool === "pen" && (
         <div className="pointer-events-none absolute inset-x-0 top-3 flex justify-center">
-          <div className="rounded-md border border-border bg-card/90 px-2 py-0.5 text-[10px] text-muted-foreground shadow backdrop-blur">
+          <div className="rounded-md border border-border bg-card/90 px-2 py-0.5 text-meta text-muted-foreground shadow backdrop-blur">
             Click to add points · drag for curves · click the first point to
             close · Enter finishes open · Esc cancels
           </div>

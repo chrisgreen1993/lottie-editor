@@ -205,9 +205,7 @@ function ExportItem({
     >
       <span className="text-muted-foreground">{icon}</span>
       <span className="flex-1">{label}</span>
-      {hint && (
-        <span className="text-[10px] text-muted-foreground">{hint}</span>
-      )}
+      {hint && <span className="text-meta text-muted-foreground">{hint}</span>}
     </button>
   );
 }

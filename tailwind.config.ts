@@ -52,11 +52,59 @@ const config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        /* Full-color tokens (not HSL channels) — canvas + keyframe accent. */
+        keyframe: "var(--color-keyframe)",
+        "checker-base": "var(--color-checker-base)",
+        "checker-tile": "var(--color-checker-tile)",
+        "canvas-dark": "var(--color-canvas-dark)",
+        "canvas-light": "var(--color-canvas-light)",
+        "on-fill": "var(--color-on-fill)",
+      },
+      /* Micro type scale (Layer 2 typography aliases). */
+      fontSize: {
+        ruler: "var(--text-ruler)",
+        meta: "var(--text-meta)",
+        label: "var(--text-label)",
+        body: "var(--text-body)",
+        title: "var(--text-title)",
+        heading: "var(--text-heading)",
+      },
+      fontFamily: {
+        sans: "var(--font-sans)",
+        mono: "var(--font-mono)",
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+        pill: "var(--radius-pill)",
+        panel: "var(--radius-panel)",
+        control: "var(--radius-control)",
+        chip: "var(--radius-chip)",
+        handle: "var(--radius-handle)",
+      },
+      boxShadow: {
+        sm: "var(--shadow-sm)",
+        md: "var(--shadow-md)",
+        panel: "var(--shadow-panel)",
+        canvas: "var(--shadow-canvas)",
+      },
+      zIndex: {
+        raised: "var(--z-raised)",
+        sticky: "var(--z-sticky)",
+        overlay: "var(--z-overlay)",
+        popover: "var(--z-popover)",
+      },
+      transitionDuration: {
+        fast: "var(--duration-fast)",
+        base: "var(--duration-base)",
+        slow: "var(--duration-slow)",
+      },
+      transitionTimingFunction: {
+        standard: "var(--ease-standard)",
+      },
+      spacing: {
+        "track-label": "var(--size-track-label)",
       },
       keyframes: {
         "accordion-down": {

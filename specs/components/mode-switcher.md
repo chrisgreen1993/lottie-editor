@@ -1,0 +1,85 @@
+# ModeSwitcher
+
+## 1. Metadata
+
+- **Name:** ModeSwitcher
+- **Category:** Chrome / navigation
+- **Status:** Stable
+- **Source:** [`components/editor/TopBar.tsx`](../../components/editor/TopBar.tsx)
+
+## 2. Overview
+
+The centered pill segmented control in the top bar that flips the editor
+between `Design` and `Animate`. Absolutely centered in `TopBar` and only
+mounted while a document is open.
+
+- **Use when:** switching the whole editor between layout work (Design) and
+  timeline work (Animate). It's the single source of truth for `editorMode`.
+- **Don't use for:** per-tool or per-layer toggles, or any control with more
+  than two mutually exclusive options — this is a fixed two-segment switch.
+
+## 3. Anatomy
+
+- **Track** — rounded-pill `--card` surface with a hairline inner pad and a
+  lifting shadow.
+- **Segments** — two `<button>`s (`Design`, `Animate`), capitalized; the
+  active one fills `--secondary`, the idle one is `--muted-foreground` text.
+
+## 4. Tokens used
+
+- Surface: track `bg-card`; active segment `bg-secondary`.
+- Text: active `--foreground`; idle `--muted-foreground` → `--foreground` on hover.
+- Radius: `--radius-pill` on the track and both segments.
+- Shadow: `--shadow-panel` lifts the track off the transparent bar.
+- Type: `--text-body`, weight `--weight-medium`.
+- Motion: `transition-colors` (default timing) on segment hover/active.
+
+## 5. Props / API
+
+```ts
+function ModeSwitcher(): JSX.Element;
+```
+
+- Takes no props. Reads `editorMode` and `setEditorMode` from the `useEditor`
+  store directly.
+- `setEditorMode` is also driven by `Tab` (Rive-style toggle) in
+  [`components/editor/Editor.tsx`](../../components/editor/Editor.tsx), and the
+  store flips to `design` automatically when a non-`select` tool is picked.
+
+## 6. States
+
+- **Default:** track `--card`; current mode filled `--secondary`.
+- **Hover:** idle segment text → `--foreground` (no fill change).
+- **Active:** the current-mode segment is filled `--secondary` with
+  `--foreground` text.
+
+## 7. Code example
+
+```tsx
+<div
+  className="flex items-center gap-1 rounded-pill bg-card p-0.5 shadow-panel"
+  title="Switch between Design and Animate (Tab)"
+>
+  {(["design", "animate"] as EditorMode[]).map((m) => (
+    <button
+      key={m}
+      type="button"
+      onClick={() => setEditorMode(m)}
+      className={cn(
+        "rounded-pill px-3.5 py-1 text-body font-medium capitalize transition-colors",
+        mode === m
+          ? "bg-secondary text-foreground"
+          : "text-muted-foreground hover:text-foreground",
+      )}
+    >
+      {m}
+    </button>
+  ))}
+</div>
+```
+
+## 8. Cross-references
+
+- [top-bar](./top-bar.md) — the host that centers this control
+- [button](./button.md) — the shadcn primitive (not used here; bespoke buttons)
+- Foundations: [color](../foundations/color.md), [radius](../foundations/radius.md)

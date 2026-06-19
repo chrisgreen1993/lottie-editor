@@ -71,7 +71,7 @@ function DocumentSettings() {
             onCommit={(v) => update((d) => void (d.op = Math.round(v)))}
           />
         </div>
-        <p className="mt-2 text-[10px] text-muted-foreground">
+        <p className="mt-2 text-meta text-muted-foreground">
           {doc.layers.length} layers · {(doc.op - doc.ip).toFixed(0)} frames ·{" "}
           {docDurationSeconds(doc).toFixed(2)}s
         </p>
@@ -94,7 +94,7 @@ function DocPalette() {
 
   return (
     <Section title="Palette">
-      <p className="mb-1 text-[10px] text-muted-foreground">
+      <p className="mb-1 text-meta text-muted-foreground">
         Editing a swatch recolors every use across the document.
       </p>
       {groups.map((group) => (
@@ -163,7 +163,7 @@ function KeyframeToggle({
         state === "on-key"
           ? "text-primary"
           : state === "off-key"
-            ? "text-amber-400"
+            ? "text-keyframe"
             : "text-muted-foreground/60 hover:text-foreground",
       )}
     >
@@ -305,7 +305,7 @@ function LayerSettings({ index }: { index: number }) {
     <>
       <Section title="Layer">
         <div className="text-xs text-foreground">{layerName(layer, index)}</div>
-        <div className="mt-0.5 text-[10px] text-muted-foreground">
+        <div className="mt-0.5 text-meta text-muted-foreground">
           {layerTypeName(layer.ty)} · frames {layer.ip.toFixed(0)}–
           {layer.op.toFixed(0)}
         </div>
@@ -316,7 +316,7 @@ function LayerSettings({ index }: { index: number }) {
           <TransformPropRow key={spec.key} spec={spec} layerIndex={index} />
         ))}
         {animateMode && (
-          <p className="mt-2 text-[10px] text-muted-foreground">
+          <p className="mt-2 text-meta text-muted-foreground">
             Keyframed values follow the playhead. Park it on a ◆ to edit that
             keyframe, or use the diamond buttons to add and remove keys.
           </p>

@@ -23,7 +23,7 @@ export function Section({
   return (
     <section className="border-b border-border px-3 py-3">
       <div className="mb-2 flex items-center justify-between">
-        <h3 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+        <h3 className="text-label font-semibold uppercase tracking-wider text-muted-foreground">
           {title}
         </h3>
         {actions}
@@ -101,7 +101,7 @@ export function NumberField({
 
   return (
     <label className="flex min-w-0 flex-1 flex-col gap-1">
-      <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+      <span className="text-meta font-medium uppercase tracking-wide text-muted-foreground">
         {label}
       </span>
       <input
@@ -191,12 +191,12 @@ export function ColorSwatch({
       <div className="min-w-0 flex-1">
         <div className="truncate text-xs text-foreground">{label}</div>
         {subtitle && (
-          <div className="truncate text-[10px] text-muted-foreground">
+          <div className="truncate text-meta text-muted-foreground">
             {subtitle}
           </div>
         )}
       </div>
-      <span className="text-[10px] uppercase tabular-nums text-muted-foreground">
+      <span className="text-meta uppercase tabular-nums text-muted-foreground">
         {hex}
       </span>
     </div>

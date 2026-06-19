@@ -103,7 +103,7 @@ function TransportBar() {
       </IconButton>
 
       <select
-        className="ml-1 h-6 rounded-md bg-background px-1.5 text-[11px] tabular-nums text-foreground focus-visible:outline-none"
+        className="ml-1 h-6 rounded-md bg-background px-1.5 text-label tabular-nums text-foreground focus-visible:outline-none"
         value={speed}
         title="Playback speed"
         onChange={(e) => setSpeed(Number(e.target.value))}
@@ -125,11 +125,11 @@ function TransportBar() {
 
       <KeyframeToolbar />
 
-      <div className="ml-auto flex items-center gap-2 text-[11px] tabular-nums text-muted-foreground">
+      <div className="ml-auto flex items-center gap-2 text-label tabular-nums text-muted-foreground">
         <span>{(Math.max(0, currentFrame - doc.ip) / doc.fr).toFixed(2)}s</span>
         <input
           type="number"
-          className="h-6 w-16 rounded-md bg-background px-1.5 text-right text-[11px] tabular-nums text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          className="h-6 w-16 rounded-md bg-background px-1.5 text-right text-label tabular-nums text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           value={Math.round(currentFrame)}
           min={doc.ip}
           max={doc.op}
@@ -164,7 +164,7 @@ function KeyframeToolbar() {
   return (
     <div className="ml-3 flex min-w-0 items-center gap-1.5 rounded-md border border-border bg-background/60 px-2 py-0.5">
       <span
-        className="max-w-44 truncate text-[11px] text-muted-foreground"
+        className="max-w-44 truncate text-label text-muted-foreground"
         title={
           multi ? selections.map((s) => s.label).join(", ") : selection.label
         }
@@ -174,7 +174,7 @@ function KeyframeToolbar() {
       {!multi && (
         <input
           type="number"
-          className="h-6 w-14 rounded-md bg-background px-1.5 text-right text-[11px] tabular-nums focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          className="h-6 w-14 rounded-md bg-background px-1.5 text-right text-label tabular-nums focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           value={Math.round(kf.t)}
           title="Keyframe frame"
           onChange={(e) =>
@@ -192,7 +192,7 @@ function KeyframeToolbar() {
         />
       )}
       <select
-        className="h-6 rounded-md bg-background px-1.5 text-[11px] focus-visible:outline-none disabled:opacity-40"
+        className="h-6 rounded-md bg-background px-1.5 text-label focus-visible:outline-none disabled:opacity-40"
         value={presetId}
         disabled={!multi && isLast}
         title={
@@ -251,7 +251,7 @@ function KeyframeToolbar() {
               }
             />
           )}
-          <p className="mt-2 max-w-44 text-[10px] text-muted-foreground">
+          <p className="mt-2 max-w-44 text-meta text-muted-foreground">
             Blue handle eases out of this keyframe, amber eases into the next.
           </p>
         </PopoverContent>
@@ -426,7 +426,7 @@ function KeyframeDiamond({
         "absolute top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rotate-45 cursor-ew-resize border transition-transform",
         selected
           ? "z-10 scale-150 border-background bg-primary shadow"
-          : "border-transparent bg-amber-400 hover:scale-125",
+          : "border-transparent bg-keyframe hover:scale-125",
       )}
       style={{ left: x }}
       title={`${track.label} · frame ${Math.round(t)} — drag to retime (⇧ snaps, ⌘-click multi-selects)`}
@@ -452,7 +452,7 @@ function PropTrackRow({
   return (
     <div className="flex">
       <div
-        className="h-6 w-[176px] shrink-0 truncate border-b border-r border-border/40 bg-card/60 py-1 pl-7 pr-2 text-[10px] text-muted-foreground"
+        className="h-6 w-[176px] shrink-0 truncate border-b border-r border-border/40 bg-card/60 py-1 pl-7 pr-2 text-meta text-muted-foreground"
         title={track.label}
       >
         {track.label}
@@ -637,7 +637,7 @@ function LayerTrack({
         return (
           <div
             key={t}
-            className="pointer-events-none absolute top-[11px] h-1.5 w-1.5 -translate-x-1/2 rotate-45 bg-amber-400/80"
+            className="pointer-events-none absolute top-[11px] h-1.5 w-1.5 -translate-x-1/2 rotate-45 bg-keyframe/80"
             style={{ left: x }}
           />
         );
@@ -803,12 +803,12 @@ function GraphView({ geom }: { geom: TrackGeometry }) {
     <div ref={containerRef} className="flex h-full">
       <div className="relative w-[176px] shrink-0 border-r border-border/40 bg-card/60 p-2">
         <div
-          className="truncate text-[10px] font-medium text-foreground"
+          className="truncate text-meta font-medium text-foreground"
           title={primary.label}
         >
           {primary.label}
         </div>
-        <div className="mt-1 flex flex-col gap-0.5 text-[9px] text-muted-foreground">
+        <div className="mt-1 flex flex-col gap-0.5 text-ruler text-muted-foreground">
           {Array.from({ length: dims }).map((_, d) => (
             <span key={d} className="flex items-center gap-1">
               <span
@@ -819,10 +819,10 @@ function GraphView({ geom }: { geom: TrackGeometry }) {
             </span>
           ))}
         </div>
-        <div className="absolute right-2 top-1 text-[9px] tabular-nums text-muted-foreground">
+        <div className="absolute right-2 top-1 text-ruler tabular-nums text-muted-foreground">
           {hi.toFixed(1)}
         </div>
-        <div className="absolute bottom-1 right-2 text-[9px] tabular-nums text-muted-foreground">
+        <div className="absolute bottom-1 right-2 text-ruler tabular-nums text-muted-foreground">
           {lo.toFixed(1)}
         </div>
       </div>
@@ -1004,7 +1004,7 @@ function GraphHandles({
                 "cursor-grab stroke-2 active:cursor-grabbing",
                 which === "o"
                   ? "fill-background stroke-primary"
-                  : "fill-background stroke-amber-400",
+                  : "fill-background stroke-keyframe",
               )}
               onPointerDown={onPointerDown}
             >
@@ -1154,7 +1154,7 @@ export function Timeline() {
       <div className="relative flex min-h-0 flex-1 flex-col">
         {/* Ruler */}
         <div className="flex h-6 shrink-0 border-b border-border">
-          <div className="w-[176px] shrink-0 border-r border-border px-2 text-[10px] leading-6 text-muted-foreground">
+          <div className="w-[176px] shrink-0 border-r border-border px-2 text-meta leading-6 text-muted-foreground">
             Frames
           </div>
           <div
@@ -1165,7 +1165,7 @@ export function Timeline() {
             {ticks.map((f) => (
               <div
                 key={f}
-                className="absolute top-0 h-full border-l border-border/70 pl-1 text-[9px] tabular-nums leading-6 text-muted-foreground"
+                className="absolute top-0 h-full border-l border-border/70 pl-1 text-ruler tabular-nums leading-6 text-muted-foreground"
                 style={{ left: frameToX(geom, f) }}
               >
                 {f}
@@ -1188,7 +1188,7 @@ export function Timeline() {
                       className={cn(
                         "flex h-7 w-[176px] shrink-0 items-center border-b border-r border-border/40",
                         selectedLayer === i
-                          ? "bg-primary text-white"
+                          ? "bg-primary text-on-fill"
                           : "text-muted-foreground hover:bg-accent/60 hover:text-foreground",
                         layer.hd && "opacity-50",
                       )}
@@ -1198,7 +1198,7 @@ export function Timeline() {
                         className={cn(
                           "flex h-full w-5 shrink-0 items-center justify-center",
                           selectedLayer === i
-                            ? "text-white/80 hover:text-white"
+                            ? "text-on-fill/80 hover:text-on-fill"
                             : "text-muted-foreground hover:text-foreground",
                         )}
                         title={
@@ -1216,7 +1216,7 @@ export function Timeline() {
                       </button>
                       <button
                         type="button"
-                        className="h-full min-w-0 flex-1 truncate pr-2 text-left text-[11px]"
+                        className="h-full min-w-0 flex-1 truncate pr-2 text-left text-label"
                         onClick={() =>
                           selectLayer(selectedLayer === i ? null : i)
                         }
@@ -1248,7 +1248,7 @@ export function Timeline() {
                         />
                       ))
                     ) : (
-                      <div className="flex h-6 items-center border-b border-border/30 bg-card/60 pl-7 text-[10px] text-muted-foreground">
+                      <div className="flex h-6 items-center border-b border-border/30 bg-card/60 pl-7 text-meta text-muted-foreground">
                         No animated properties
                       </div>
                     ))}
@@ -1260,10 +1260,10 @@ export function Timeline() {
         {/* Snap guide */}
         {snapGuide !== null && (
           <div
-            className="pointer-events-none absolute bottom-0 top-0 z-10 w-px bg-amber-400"
+            className="pointer-events-none absolute bottom-0 top-0 z-10 w-px bg-keyframe"
             style={{ left: LABEL_W + frameToX(geom, snapGuide) }}
           >
-            <div className="absolute left-1 top-0 rounded-sm bg-amber-400 px-1 text-[9px] font-medium tabular-nums text-background">
+            <div className="absolute left-1 top-0 rounded-sm bg-keyframe px-1 text-ruler font-medium tabular-nums text-background">
               {snapGuide}
             </div>
           </div>
