@@ -114,6 +114,29 @@ function previewMatrix(
     .multiply(orig);
 }
 
+/** Screen-space CSS transform for the selection frame during a drag,
+ *  mirroring what the artwork preview does around the box center. */
+function frameTransform(
+  mode: DragMode,
+  ev: PointerEvent,
+  ctx: DragContext,
+): string {
+  if (mode === "move") {
+    return `translate(${ev.clientX - ctx.startX}px, ${ev.clientY - ctx.startY}px)`;
+  }
+  if (mode === "scale") {
+    const d0 = Math.hypot(ctx.startX - ctx.centerX, ctx.startY - ctx.centerY);
+    const d1 = Math.hypot(ev.clientX - ctx.centerX, ev.clientY - ctx.centerY);
+    const factor = d0 < 2 ? 1 : d1 / d0;
+    return `scale(${factor})`;
+  }
+  const a0 = Math.atan2(ctx.startY - ctx.centerY, ctx.startX - ctx.centerX);
+  const a1 = Math.atan2(ev.clientY - ctx.centerY, ev.clientX - ctx.centerX);
+  let deg = ((a1 - a0) * 180) / Math.PI;
+  if (ev.shiftKey) deg = Math.round(deg / 15) * 15;
+  return `rotate(${deg}deg)`;
+}
+
 export function CanvasOverlay({ scale }: { scale: number }) {
   const doc = useEditor((s) => s.doc);
   const selected = useEditor((s) => s.selectedLayer);
@@ -121,7 +144,12 @@ export function CanvasOverlay({ scale }: { scale: number }) {
   const setPlaying = useEditor((s) => s.setPlaying);
 
   const rootRef = React.useRef<HTMLDivElement>(null);
+  const frameRef = React.useRef<HTMLDivElement>(null);
   const [box, setBox] = React.useState<Box | null>(null);
+  // While a drag is live the box is moved by a single CSS transform on the
+  // frame wrapper (lockstep with the artwork preview); measurement pauses so
+  // the rAF loop can't fight the transform and make the box stutter.
+  const draggingRef = React.useRef(false);
   const lastDownRef = React.useRef<{ time: number; x: number; y: number }>({
     time: 0,
     x: 0,
@@ -139,6 +167,8 @@ export function CanvasOverlay({ scale }: { scale: number }) {
     }
     let raf = 0;
     const measure = () => {
+      // Frozen during a drag — the frame wrapper is transformed directly.
+      if (draggingRef.current) return;
       const node = layerNode(selected);
       const parent = rootRef.current?.parentElement;
       if (!node || !parent) {
@@ -238,7 +268,18 @@ export function CanvasOverlay({ scale }: { scale: number }) {
     }
     if (node) node.style.transformOrigin = "0 0";
 
+    // Freeze box measurement and move the selection frame as one unit, in
+    // lockstep with the artwork preview, so the box never stutters.
+    draggingRef.current = true;
+    const frame = frameRef.current;
+    if (frame && box) {
+      frame.style.transformOrigin = `${box.left + box.width / 2}px ${
+        box.top + box.height / 2
+      }px`;
+    }
+
     let lastValue: number[] | null = null;
+    let moved = false;
     const propKey = mode === "move" ? "p" : mode === "scale" ? "s" : "r";
 
     const target = e.currentTarget as HTMLElement;
@@ -248,6 +289,7 @@ export function CanvasOverlay({ scale }: { scale: number }) {
       // Synthetic or already-released pointers can lack an active id.
     }
     const handleMove = (ev: PointerEvent) => {
+      moved = true;
       lastValue = dragValue(mode, ev, ctx, scale);
       if (node) {
         node.style.transform = previewMatrix(
@@ -257,19 +299,31 @@ export function CanvasOverlay({ scale }: { scale: number }) {
           orig,
         ).toString();
       }
+      // The frame box follows with the equivalent screen-space transform.
+      if (frame) frame.style.transform = frameTransform(mode, ev, ctx);
+    };
+    const resume = () => {
+      if (frame) frame.style.transform = "";
+      draggingRef.current = false;
     };
     const handleUp = () => {
       target.removeEventListener("pointermove", handleMove);
       target.removeEventListener("pointerup", handleUp);
-      if (node) {
-        node.style.transform = "";
-        node.style.transformOrigin = "";
-      }
-      if (lastValue) {
+      if (moved && lastValue) {
         const value = lastValue;
         update((draft) =>
           setTransformAtPlayhead(draft, selected, propKey, ctx.frame, value),
         );
+        // Keep the preview (node transform + frame transform) in place until
+        // the canvas has rebuilt at the committed position, then resume
+        // measuring — avoids a one-frame flash back to the old spot.
+        requestAnimationFrame(() => requestAnimationFrame(resume));
+      } else {
+        if (node) {
+          node.style.transform = "";
+          node.style.transformOrigin = "";
+        }
+        resume();
       }
     };
     target.addEventListener("pointermove", handleMove);
@@ -292,7 +346,7 @@ export function CanvasOverlay({ scale }: { scale: number }) {
       data-canvas-overlay
     >
       {box && (
-        <>
+        <div ref={frameRef} className="pointer-events-none absolute inset-0">
           <div
             className="pointer-events-auto absolute cursor-move border border-primary/90"
             style={{
@@ -331,7 +385,7 @@ export function CanvasOverlay({ scale }: { scale: number }) {
           >
             <RotateCw size={10} />
           </div>
-        </>
+        </div>
       )}
     </div>
   );
