@@ -68,7 +68,7 @@ function TopBar({ onOpenFile }: { onOpenFile: () => void }): JSX.Element;
 ## 7. Code example
 
 ```tsx
-<header className="relative flex h-10 shrink-0 items-center gap-2 rounded-panel bg-card px-3">
+<header className="relative flex shrink-0 items-center gap-2 rounded-panel bg-card p-1">
   {doc && (
     <div className="absolute left-1/2 top-1/2 z-raised -translate-x-1/2 -translate-y-1/2">
       <ModeSwitcher />
