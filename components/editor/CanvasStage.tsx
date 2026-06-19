@@ -421,7 +421,7 @@ export function CanvasStage() {
           : {};
 
   return (
-    <div className="relative flex min-h-0 min-w-0 flex-1 flex-col bg-background">
+    <div className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-panel bg-background">
       <div
         ref={containerRef}
         className="min-h-0 flex-1 overflow-auto"
@@ -435,7 +435,7 @@ export function CanvasStage() {
             would otherwise clamp to the container and the overflow would
             center off-screen); min-w/h-full keeps it centered when it fits.
             Together the whole canvas stays scrollable from the (0,0) origin. */}
-        <div className="flex w-max min-h-full min-w-full items-center justify-center p-6">
+        <div className="flex w-max min-h-full min-w-full items-center justify-center">
           <div
             className={cn(
               "relative shrink-0 overflow-hidden rounded-sm shadow-2xl ring-1 ring-border",
