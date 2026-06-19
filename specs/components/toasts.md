@@ -35,7 +35,7 @@ once near the editor root.
 - Text: `--foreground` for the message; icon tints `--primary` (info) and
   `--destructive` (error); dismiss button `--muted-foreground` → `--foreground`
   on hover.
-- Radius: `--radius`/`rounded-lg` on the toast card.
+- Radius: `--radius-panel`/`rounded-panel` on the toast card (a floating surface).
 - Shadow: `--shadow-panel`-scale lift on the floating card.
 - Z-index: `--z-popover`/`z-50` — sits above all editor chrome.
 
@@ -64,7 +64,7 @@ export function Toasts(): JSX.Element | null;
     <div
       key={t.id}
       className={cn(
-        "pointer-events-auto flex items-center gap-2 rounded-lg border px-3 py-2",
+        "pointer-events-auto flex items-center gap-2 rounded-panel border px-3 py-2",
         "text-body shadow-panel backdrop-blur",
         t.kind === "error"
           ? "border-destructive/50 bg-destructive/15 text-foreground"

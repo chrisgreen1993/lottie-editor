@@ -34,8 +34,8 @@ report changes through `onChange`.
   (`bg-background`). The popover surface is `--popover` (owned by
   [popover](./popover.md)).
 - Text: label `--foreground`; subtitle and hex readout `--muted-foreground`.
-- Radius: swatch and hex input round to `--radius`-family
-  (`rounded` / `rounded-lg`).
+- Radius: swatch and hex input round to the control step
+  (`rounded` / `rounded-control`, both 4px).
 - Border: swatch outline `--border` (`border-border`).
 - Shadow: swatch carries `--shadow-sm` (`shadow-sm`) — the elevation token
   reserved for swatches.

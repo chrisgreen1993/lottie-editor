@@ -26,10 +26,10 @@ its left/right edges line up with them.
   screen (confirm-guarded).
 - **File name** — inline editable text field (transparent until hover/focus).
 - **History** — undo / redo icon buttons.
-- **Mode switcher** — absolutely centered pill segmented control (`Design` |
+- **Mode switcher** — absolutely centered segmented control (`Design` |
   `Animate`); see [mode-switcher](./mode-switcher.md).
 - **Spacer** — pushes actions right.
-- **Actions** — `Open` (ghost pill) and `Export` (primary pill + popover menu).
+- **Actions** — `Open` (ghost button) and `Export` (primary button + popover menu).
 
 ## 4. Tokens used
 
@@ -37,9 +37,9 @@ its left/right edges line up with them.
   convention, since the bar is now a card surface). Export uses `bg-primary` /
   `text-primary-foreground`.
 - Text: `--foreground` (file name), `--muted-foreground` (idle controls).
-- Radius: `--radius-panel` on the bar card; `--radius-pill` on every button and
-  the switcher; `--radius-control` on the file-name field; `--radius-chip` on
-  Export popover items.
+- Radius: concentric — `--radius-panel` (6) on the bar card; `--radius-control`
+  (4) on every button, the file-name field and the switcher track; Export
+  popover items also `--radius-control`. No pills.
 - Shadow: none on the bar (flat card, like the panels); `--shadow-md` on the
   popover.
 - Type: `--text-title` is reserved for the (removed) wordmark; controls use
@@ -74,12 +74,12 @@ function TopBar({ onOpenFile }: { onOpenFile: () => void }): JSX.Element;
       <ModeSwitcher />
     </div>
   )}
-  <IconButton label="Close and go home" className="rounded-pill hover:bg-accent" … />
+  <IconButton label="Close and go home" className="rounded-control hover:bg-accent" … />
   <input className="h-7 w-48 rounded-control bg-transparent px-2 text-body
                     text-foreground transition-colors hover:bg-card
                     focus-visible:bg-card focus-visible:ring-1 focus-visible:ring-ring" … />
   …
-  <button className="inline-flex h-8 items-center gap-1.5 rounded-pill bg-primary
+  <button className="inline-flex h-8 items-center gap-1.5 rounded-control bg-primary
                      px-3.5 text-body font-medium text-primary-foreground
                      transition-colors hover:bg-primary/90">
     <Download size={14} /> Export

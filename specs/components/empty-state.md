@@ -85,7 +85,7 @@ export function EmptyState({
   type="button"
   onClick={onOpenFile}
   className={cn(
-    "flex w-full flex-col items-center gap-2 rounded-xl border-2 border-dashed",
+    "flex w-full flex-col items-center gap-2 rounded-panel border-2 border-dashed",
     "border-border bg-card/50 px-6 py-10 text-center transition-colors",
     "hover:border-primary/60 hover:bg-card",
     dragActive && "border-primary bg-primary/10",

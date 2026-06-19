@@ -17,7 +17,7 @@ export function Toasts() {
         <div
           key={t.id}
           className={cn(
-            "pointer-events-auto flex items-center gap-2 rounded-lg border px-3 py-2 text-xs shadow-lg backdrop-blur",
+            "pointer-events-auto flex items-center gap-2 rounded-panel border px-3 py-2 text-xs shadow-lg backdrop-blur",
             t.kind === "error"
               ? "border-destructive/50 bg-destructive/15 text-foreground"
               : "border-border bg-card/95 text-foreground",

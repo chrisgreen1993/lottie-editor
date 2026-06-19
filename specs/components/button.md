@@ -32,7 +32,7 @@ escape hatch. It's the generic, framework-style button.
   `bg-secondary`; `outline`/`ghost` hover `bg-accent`; `outline` border `--input`.
 - Text: `--primary-foreground`, `--destructive-foreground`,
   `--secondary-foreground`, `--accent-foreground`; `link` uses `--primary`.
-- Radius: `--radius` (`rounded-md`); `sm`/`lg` keep `rounded-md`.
+- Radius: `rounded-md` (4px, the control step); `sm`/`lg` keep `rounded-md`.
 - Type: `--text-label` (`text-sm`), weight `--weight-medium`.
 - Motion: `transition-colors` (default timing).
 - Focus: `ring-ring` with offset against `--background`.

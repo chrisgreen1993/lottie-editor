@@ -27,7 +27,7 @@ function ModeSwitcher() {
   const setEditorMode = useEditor((s) => s.setEditorMode);
   return (
     <div
-      className="flex items-center gap-1 rounded-full bg-background p-0.5"
+      className="flex items-center gap-1 rounded-control bg-background p-0.5"
       title="Switch between Design and Animate (Tab)"
     >
       {(["design", "animate"] as EditorMode[]).map((m) => (
@@ -36,7 +36,7 @@ function ModeSwitcher() {
           type="button"
           onClick={() => setEditorMode(m)}
           className={cn(
-            "rounded-full px-3.5 py-1 text-xs font-medium capitalize transition-colors",
+            "rounded-handle px-3.5 py-1 text-xs font-medium capitalize transition-colors",
             mode === m
               ? "bg-secondary text-foreground"
               : "text-muted-foreground hover:text-foreground",
@@ -73,7 +73,7 @@ export function TopBar({ onOpenFile }: { onOpenFile: () => void }) {
         <>
           <IconButton
             label="Close and go home"
-            className="rounded-full hover:bg-accent"
+            className="rounded-control hover:bg-accent"
             onClick={() => {
               if (
                 window.confirm(
@@ -87,7 +87,7 @@ export function TopBar({ onOpenFile }: { onOpenFile: () => void }) {
             <Home size={15} />
           </IconButton>
           <input
-            className="h-7 w-48 rounded-lg bg-transparent px-2 text-xs text-foreground transition-colors hover:bg-accent focus-visible:bg-accent focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            className="h-7 w-48 rounded-control bg-transparent px-2 text-xs text-foreground transition-colors hover:bg-accent focus-visible:bg-accent focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             value={fileName}
             title="File name"
             onChange={(e) => setFileName(e.target.value)}
@@ -96,7 +96,7 @@ export function TopBar({ onOpenFile }: { onOpenFile: () => void }) {
           <div className="ml-2 flex items-center gap-0.5">
             <IconButton
               label="Undo (⌘Z)"
-              className="rounded-full hover:bg-accent"
+              className="rounded-control hover:bg-accent"
               disabled={!canUndo}
               onClick={undo}
             >
@@ -104,7 +104,7 @@ export function TopBar({ onOpenFile }: { onOpenFile: () => void }) {
             </IconButton>
             <IconButton
               label="Redo (⇧⌘Z)"
-              className="rounded-full hover:bg-accent"
+              className="rounded-control hover:bg-accent"
               disabled={!canRedo}
               onClick={redo}
             >
@@ -118,7 +118,7 @@ export function TopBar({ onOpenFile }: { onOpenFile: () => void }) {
         <button
           type="button"
           onClick={onOpenFile}
-          className="inline-flex h-8 items-center gap-1.5 rounded-full px-3.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+          className="inline-flex h-8 items-center gap-1.5 rounded-control px-3.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
         >
           <FolderOpen size={14} />
           Open
@@ -130,7 +130,7 @@ export function TopBar({ onOpenFile }: { onOpenFile: () => void }) {
               <PopoverTrigger asChild>
                 <button
                   type="button"
-                  className="inline-flex h-8 items-center gap-1.5 rounded-full bg-primary px-3.5 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+                  className="inline-flex h-8 items-center gap-1.5 rounded-control bg-primary px-3.5 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90"
                 >
                   <Download size={14} />
                   Export
@@ -201,7 +201,7 @@ function ExportItem({
     <button
       type="button"
       onClick={onClick}
-      className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs text-foreground transition-colors hover:bg-accent"
+      className="flex w-full items-center gap-2 rounded-control px-2 py-1.5 text-left text-xs text-foreground transition-colors hover:bg-accent"
     >
       <span className="text-muted-foreground">{icon}</span>
       <span className="flex-1">{label}</span>

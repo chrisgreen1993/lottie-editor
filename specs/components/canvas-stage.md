@@ -11,7 +11,7 @@
 
 The center stage of the editor. Hosts a lottie-web SVG instance rendering the
 document into a lifted, checkerboard-backed artboard, plus the floating chrome
-that surrounds it: the bottom zoom/fit/background pill, and — in design mode
+that surrounds it: the bottom zoom/fit/background bar, and — in design mode
 only — the left tool rail. It also owns the canvas-level pointer gestures:
 shape drag-to-draw, pen drawing, click-to-select, and double-click-to-path-edit.
 
@@ -26,17 +26,17 @@ shape drag-to-draw, pen drawing, click-to-select, and double-click-to-path-edit.
 
 - **Scroll container** — fills the stage; ctrl/⌘-wheel zooms about the pointer.
 - **Artboard** — fixed-size lifted card (`width/height = doc.w/h × scale`),
-  `rounded-sm`, ring hairline, checkerboard when the background is `checker`.
+  `rounded-panel`, ring hairline, checkerboard when the background is `checker`.
 - **Lottie host** — the inner `div` lottie-web renders into; CSS-scaled by the
   current zoom from a top-left origin.
 - **Overlays** — [path-edit-overlay](./path-edit-overlay.md) when a path layer
   is being edited, otherwise [canvas-overlay](./canvas-overlay.md) in select
   mode. The in-progress draw rectangle and pen preview SVG also live here.
-- **Tool rail** _(design mode only)_ — left, vertically centered floating pill
-  column of full-round [icon-button](./icon-button.md)s: Select / Rectangle /
+- **Tool rail** _(design mode only)_ — left, vertically centered floating
+  `rounded-panel` column of [icon-button](./icon-button.md)s: Select / Rectangle /
   Ellipse / Star / Pen.
 - **Pen hint banner** _(pen tool only)_ — top-centered chip of usage hints.
-- **View pill** — bottom-centered floating pill: zoom out / percentage (reset
+- **View bar** — bottom-centered floating bar: zoom out / percentage (reset
   to 100%) / zoom in / fit-to-view, a divider, then four background swatches
   (Checkerboard / Dark / Light / Document color).
 
@@ -53,8 +53,9 @@ shape drag-to-draw, pen drawing, click-to-select, and double-click-to-path-edit.
   stroke + vertices, swatch active ring).
 - Text: `--muted-foreground` for the zoom readout and pen hint; `--foreground`
   on hover.
-- Radius: `--radius-pill` on the tool rail, view pill, and tool buttons;
-  `--radius` (`rounded-sm`) on the artboard.
+- Radius: concentric — `--radius-panel` on the artboard and the floating tool
+  rail / view bar (surfaces); `--radius-control` on the tool and zoom buttons
+  nested inside them.
 - Z-index: overlays render above the lottie host inside the artboard; reach for
   `--z-raised` for stacked affordances.
 - Motion: `transition-transform` on the background swatches (hover scale).
@@ -105,7 +106,7 @@ function CanvasStage(): JSX.Element | null;
     <div className="flex min-h-full min-w-full items-center justify-center p-6">
       <div
         className={cn(
-          "relative shrink-0 overflow-hidden rounded-sm shadow-canvas ring-1 ring-border",
+          "relative shrink-0 overflow-hidden rounded-panel shadow-canvas ring-1 ring-border",
           canvasBg === "checker" && "bg-checker",
         )}
         style={{ width: doc.w * scale, height: doc.h * scale, ...stageBgStyle }}
@@ -121,10 +122,10 @@ function CanvasStage(): JSX.Element | null;
 
   {editorMode === "design" && (
     <div className="pointer-events-none absolute inset-y-0 left-3 flex items-center">
-      <div className="pointer-events-auto flex flex-col gap-0.5 rounded-pill bg-card/95 px-1 py-1.5 shadow-panel backdrop-blur">
+      <div className="pointer-events-auto flex flex-col gap-0.5 rounded-panel bg-card/95 px-1 py-1.5 shadow-panel backdrop-blur">
         {TOOLS.map((t) => (
           <IconButton key={t.id} label={t.label} active={tool === t.id}
-            className="rounded-pill" onClick={() => setTool(t.id)}>{t.icon}</IconButton>
+            className="rounded-control" onClick={() => setTool(t.id)}>{t.icon}</IconButton>
         ))}
       </div>
     </div>

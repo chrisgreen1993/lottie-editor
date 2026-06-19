@@ -107,7 +107,7 @@ export function NumberField({
       <input
         type="number"
         inputMode="decimal"
-        className="h-7 w-full rounded-lg bg-background px-2 text-xs tabular-nums text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+        className="h-7 w-full rounded-control bg-background px-2 text-xs tabular-nums text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
         value={text}
         step={step}
         min={min}
@@ -177,7 +177,7 @@ export function ColorSwatch({
         <PopoverContent className="w-auto p-3" side="left">
           <HexColorPicker color={hex} onChange={(h) => commitHex(h)} />
           <input
-            className="mt-2 h-7 w-full rounded-lg bg-background px-2 text-xs uppercase tabular-nums focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            className="mt-2 h-7 w-full rounded-control bg-background px-2 text-xs uppercase tabular-nums focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             value={hexText}
             onChange={(e) => setHexText(e.target.value)}
             onBlur={(e) => commitHex(e.target.value)}

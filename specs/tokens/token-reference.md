@@ -78,14 +78,17 @@ as complete values.
 
 ## Radius
 
-| Alias              | Value  | Tailwind          | Use for                     |
-| ------------------ | ------ | ----------------- | --------------------------- |
-| `--radius`         | 8px    | `rounded-lg`      | Base anchor (md/sm derive)  |
-| `--radius-chip`    | 6px    | `rounded-chip`    | Icon buttons, small chips   |
-| `--radius-control` | 8px    | `rounded-control` | Inputs, selects             |
-| `--radius-panel`   | 6px    | `rounded-panel`   | Panels, canvas, top bar     |
-| `--radius-pill`    | 9999px | `rounded-pill`    | Buttons, toolbars, switcher |
-| `--radius-handle`  | 2px    | `rounded-handle`  | Vertex/scale handles        |
+Concentric ladder — surface 6 → control 4 → handle 2 (see
+[radius foundation](../foundations/radius.md)).
+
+| Alias              | Value  | Tailwind          | Use for                                  |
+| ------------------ | ------ | ----------------- | ---------------------------------------- |
+| `--radius`         | 6px    | `rounded-lg`      | Surface anchor (md = 4, sm = 2 derive)   |
+| `--radius-panel`   | 6px    | `rounded-panel`   | Surfaces: panels, canvas, top bar, toolbars, popovers |
+| `--radius-control` | 4px    | `rounded-control` | Controls: buttons, inputs, menu items    |
+| `--radius-chip`    | 4px    | `rounded-chip`    | Small chips, menu items (= control)      |
+| `--radius-handle`  | 2px    | `rounded-handle`  | Handles, ticks, switcher segments        |
+| `--radius-pill`    | 9999px | `rounded-pill`    | Reserved — unused in chrome              |
 
 ## Elevation
 

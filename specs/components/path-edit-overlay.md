@@ -47,9 +47,9 @@ path) and into local state, committing one document write on release.
 - Surface: toolbar on `--card` (`bg-card/95`) with `--border` hairline; handle
   fills on `--background`; toolbar buttons on `--secondary`.
 - Text: `--muted-foreground` for the hint string.
-- Radius: `--radius-handle` (`rounded-[2px]`) on vertex squares;
-  `--radius-pill` (`rounded-full`) on tangent handles; toolbar buttons use the
-  base `--radius`.
+- Radius: `--radius-handle` (`rounded-handle`) on vertex squares; tangent
+  handles are true circles (`rounded-full`); the floating toolbar is a surface
+  (`rounded-panel`).
 - Note on amber: vertex/tangent handles render in `--primary` (sky) in the
   current source, not amber — the amber accent token `--color-keyframe` is
   reserved for keyframe affordances (timeline/easing), not path handles.
@@ -97,7 +97,7 @@ function PathEditOverlay(): JSX.Element | null;
 >
   <div
     className="pointer-events-auto absolute left-1/2 top-2 z-raised flex -translate-x-1/2
-                  items-center gap-2 rounded-md border border-border bg-card/95 px-2.5 py-1
+                  items-center gap-2 rounded-panel border border-border bg-card/95 px-2.5 py-1
                   text-label shadow-panel backdrop-blur"
   >
     <span className="text-muted-foreground">

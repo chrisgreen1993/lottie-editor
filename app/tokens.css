@@ -196,12 +196,17 @@
   --leading-tight: var(--ds-leading-tight, 1.25);
   --leading-normal: var(--ds-leading-normal, 1.5);
 
-  /* Radius aliases — `--radius` is the Tailwind anchor (lg/md/sm derive). */
-  --radius: var(--ds-radius-lg, 0.5rem);
+  /* Radius aliases — a concentric ladder: every nested corner is smaller than
+   * its container so inner radii always respect the outer one.
+   *   surface 6  →  control 4  →  handle 2   (each step a 2px tighter inset)
+   * `--radius` is the Tailwind anchor at the surface step, so the derived
+   * utilities fall straight onto the ladder: rounded-lg = 6 (surface),
+   * rounded-md = 4 (control), rounded-sm = 2 (handle). */
+  --radius: var(--ds-radius-md, 6px);
   --radius-pill: var(--ds-radius-full, 9999px);
   --radius-panel: var(--ds-radius-md, 6px);
-  --radius-control: var(--ds-radius-lg, 8px);
-  --radius-chip: var(--ds-radius-md, 6px);
+  --radius-control: var(--ds-radius-sm, 4px);
+  --radius-chip: var(--ds-radius-sm, 4px);
   --radius-handle: var(--ds-radius-xs, 2px);
 
   /* Elevation aliases */

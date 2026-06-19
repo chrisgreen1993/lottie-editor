@@ -41,8 +41,8 @@ duration of a drag.
 - Stroke / fill: `--primary` for the box border and all handle borders (the box
   uses `border-primary/90`).
 - Handle surface: `--background`; the rotate glyph is `text-primary`.
-- Radius: corner handles use `--radius-handle` (`rounded-[2px]`); the rotate
-  handle is `--radius-pill` (`rounded-full`).
+- Radius: corner handles use `--radius-handle` (`rounded-handle`); the rotate
+  handle is a true circle (`rounded-full`).
 - Z-index: drawn above the lottie host inside the artboard; reach for
   `--z-raised` when stacking against other in-canvas affordances.
 - Motion: none declared — movement is driven imperatively (rAF tracking + a
@@ -99,7 +99,7 @@ type DragMode = "move" | "scale" | "rotate";
     ))}
     <div
       className="pointer-events-auto absolute flex h-5 w-5 -translate-x-1/2 -translate-y-1/2
-                 cursor-grab items-center justify-center rounded-pill border border-primary
+                 cursor-grab items-center justify-center rounded-full border border-primary
                  bg-background text-primary active:cursor-grabbing"
       style={{ left: box.left + box.width / 2, top: Math.max(12, box.top - 18) }}
       onPointerDown={(e) => beginDrag(e, "rotate")}>

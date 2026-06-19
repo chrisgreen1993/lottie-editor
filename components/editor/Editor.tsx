@@ -298,7 +298,7 @@ export function Editor() {
 
       {dragActive && doc && (
         <div className="pointer-events-none fixed inset-0 z-40 flex items-center justify-center bg-background/70 backdrop-blur-sm">
-          <div className="rounded-xl border-2 border-dashed border-primary bg-card px-8 py-6 text-sm font-medium">
+          <div className="rounded-panel border-2 border-dashed border-primary bg-card px-8 py-6 text-sm font-medium">
             Drop a Lottie .json to replace · an .svg adds a layer
           </div>
         </div>

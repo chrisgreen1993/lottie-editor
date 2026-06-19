@@ -9,7 +9,7 @@
 
 ## 2. Overview
 
-The centered pill segmented control in the top bar that flips the editor
+The centered segmented control in the top bar that flips the editor
 between `Design` and `Animate`. Absolutely centered in `TopBar` and only
 mounted while a document is open.
 
@@ -20,7 +20,7 @@ mounted while a document is open.
 
 ## 3. Anatomy
 
-- **Track** — rounded-pill `--background` surface with a hairline inner pad,
+- **Track** — `rounded-control` `--background` surface with a `p-0.5` inner pad,
   reading as an inset well on the `--card` top bar.
 - **Segments** — two `<button>`s (`Design`, `Animate`), capitalized; the
   active one fills `--secondary`, the idle one is `--muted-foreground` text.
@@ -30,7 +30,8 @@ mounted while a document is open.
 - Surface: track `bg-background` (inset on the card bar); active segment
   `bg-secondary`.
 - Text: active `--foreground`; idle `--muted-foreground` → `--foreground` on hover.
-- Radius: `--radius-pill` on the track and both segments.
+- Radius: concentric — `--radius-control` (4) track, `--radius-handle` (2)
+  segments (4 − 2px pad = 2, so segment corners trace the track's).
 - Shadow: none — the track is inset, not floating.
 - Type: `--text-body`, weight `--weight-medium`.
 - Motion: `transition-colors` (default timing) on segment hover/active.
@@ -58,7 +59,7 @@ function ModeSwitcher(): JSX.Element;
 
 ```tsx
 <div
-  className="flex items-center gap-1 rounded-pill bg-background p-0.5"
+  className="flex items-center gap-1 rounded-control bg-background p-0.5"
   title="Switch between Design and Animate (Tab)"
 >
   {(["design", "animate"] as EditorMode[]).map((m) => (
@@ -67,7 +68,7 @@ function ModeSwitcher(): JSX.Element;
       type="button"
       onClick={() => setEditorMode(m)}
       className={cn(
-        "rounded-pill px-3.5 py-1 text-body font-medium capitalize transition-colors",
+        "rounded-handle px-3.5 py-1 text-body font-medium capitalize transition-colors",
         mode === m
           ? "bg-secondary text-foreground"
           : "text-muted-foreground hover:text-foreground",

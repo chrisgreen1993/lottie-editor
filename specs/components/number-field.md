@@ -22,7 +22,7 @@ titled block these fields sit inside.
 ## 3. Anatomy
 
 - **Label** — uppercase `--text-meta` caption above the input.
-- **Input** — `rounded-lg` numeric field on `bg-background`, `tabular-nums`,
+- **Input** — `rounded-control` numeric field on `bg-background`, `tabular-nums`,
   no visible border, full-width within its flex column.
 - **Section** (companion export) — a bordered block with an uppercase title row
   (optional `actions` slot) wrapping arbitrary children.
@@ -32,7 +32,7 @@ titled block these fields sit inside.
 - Surface: input sits on `--background` (`bg-background`).
 - Text: value `--foreground`; label `--muted-foreground`; `Section` title
   `--muted-foreground`.
-- Radius: `--radius` on the input (`rounded-lg`).
+- Radius: `--radius-control` on the input (`rounded-control`).
 - Border: `Section` divider `--border` (`border-border`).
 - Type: input `--text-body`, `tabular-nums`; label `--text-meta`
   `--weight-medium` uppercase; `Section` title at the `--text-label`-ish
@@ -105,7 +105,7 @@ export function NumberField(props: NumberFieldProps): JSX.Element;
 
 // the input, token-backed
 <input type="number"
-  className="h-7 w-full rounded-lg bg-background px-2 text-body tabular-nums
+  className="h-7 w-full rounded-control bg-background px-2 text-body tabular-nums
              text-foreground focus-visible:ring-1 focus-visible:ring-ring
              disabled:cursor-not-allowed disabled:opacity-50" />
 ```

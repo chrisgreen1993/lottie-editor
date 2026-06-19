@@ -29,7 +29,7 @@ color swatches (react-colorful picker).
 ## 4. Tokens used
 
 - Surface: `bg-popover`, text `--popover-foreground`, border `--border`.
-- Radius: `--radius` (`rounded-md`).
+- Radius: `--radius-panel` (`rounded-panel`) — a floating surface.
 - Shadow: `--shadow-md`.
 - Z-index: `--z-popover` (50).
 - Padding: default `p-4` (callers tighten, e.g. `p-1.5` for the Export menu).
@@ -67,7 +67,7 @@ const PopoverContent: React.ForwardRefExoticComponent<
 <Popover open={exportOpen} onOpenChange={setExportOpen}>
   <PopoverTrigger asChild>
     <button
-      className="inline-flex h-8 items-center gap-1.5 rounded-pill
+      className="inline-flex h-8 items-center gap-1.5 rounded-control
                        bg-primary px-3.5 text-body font-medium
                        text-primary-foreground transition-colors hover:bg-primary/90"
     >

@@ -72,7 +72,7 @@ export function EmptyState({
     <div className="flex flex-1 items-center justify-center bg-background p-8">
       <div className="w-full max-w-lg">
         <div className="mb-8 text-center">
-          <div className="mb-3 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/15 text-primary">
+          <div className="mb-3 inline-flex h-14 w-14 items-center justify-center rounded-panel bg-primary/15 text-primary">
             <Clapperboard size={28} />
           </div>
           <h1 className="text-2xl font-semibold tracking-tight">
@@ -88,7 +88,7 @@ export function EmptyState({
           type="button"
           onClick={onOpenFile}
           className={cn(
-            "flex w-full flex-col items-center gap-2 rounded-xl border-2 border-dashed border-border bg-card/50 px-6 py-10 text-center transition-colors hover:border-primary/60 hover:bg-card",
+            "flex w-full flex-col items-center gap-2 rounded-panel border-2 border-dashed border-border bg-card/50 px-6 py-10 text-center transition-colors hover:border-primary/60 hover:bg-card",
             dragActive && "border-primary bg-primary/10",
           )}
         >
@@ -138,7 +138,7 @@ export function EmptyState({
               className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
             />
             <input
-              className="h-9 w-full rounded-lg bg-card pl-8 pr-3 text-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              className="h-9 w-full rounded-control bg-card pl-8 pr-3 text-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               placeholder="https://… link to a Lottie JSON"
               value={url}
               onChange={(e) => setUrl(e.target.value)}

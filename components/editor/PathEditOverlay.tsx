@@ -324,7 +324,7 @@ export function PathEditOverlay() {
       className="pointer-events-none absolute inset-0"
       data-canvas-overlay
     >
-      <div className="pointer-events-auto absolute left-1/2 top-2 z-10 flex -translate-x-1/2 items-center gap-2 rounded-md border border-border bg-card/95 px-2.5 py-1 text-label shadow-lg backdrop-blur">
+      <div className="pointer-events-auto absolute left-1/2 top-2 z-10 flex -translate-x-1/2 items-center gap-2 rounded-panel border border-border bg-card/95 px-2.5 py-1 text-label shadow-lg backdrop-blur">
         <span className="text-muted-foreground">
           {layerName(layer, layerIndex)} · click outline to add a point ·
           double-click a point for corner/smooth · ⌥ breaks handles · ⌫ deletes

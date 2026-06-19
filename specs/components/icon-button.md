@@ -15,7 +15,7 @@ lucide icon with an accessible label and an optional `active` press state.
 
 - **Use when:** you need a compact, icon-only action — toggling a tool,
   triggering undo/redo, or a section-header affordance.
-- **Don't use for:** labelled pill actions like `Open` / `Export` (those are
+- **Don't use for:** labelled actions like `Open` / `Export` (those are
   bespoke buttons), or text-bearing controls. Pass a `<label>` for text.
 
 ## 3. Anatomy
@@ -29,7 +29,8 @@ lucide icon with an accessible label and an optional `active` press state.
 - Surface: transparent by default; `--accent` on hover and when `active`.
 - Text: `--muted-foreground` idle → `--foreground` on hover; `--primary` when
   `active`.
-- Radius: `--radius-chip` (callers in the top bar override with `--radius-pill`).
+- Radius: `--radius-control` (4) — the control step of the concentric ladder,
+  matching the surface (`--radius-panel`) it sits inside.
 - Type: icon-only; no text token.
 - Motion: `transition-colors` (default timing).
 - Disabled: `disabled:opacity-40` with pointer events off.
@@ -48,7 +49,7 @@ function IconButton(
 - `label` — required; sets both `title` and `aria-label`.
 - `active` — adds the pressed `bg-accent text-primary` look.
 - `className` — merged via `cn`, so callers can override radius/hover (e.g.
-  the top bar swaps in `rounded-pill hover:bg-card`).
+  the top bar and tool rail pass `rounded-control`).
 - All other `<button>` attributes (`onClick`, `disabled`, …) pass through.
 
 ## 6. States

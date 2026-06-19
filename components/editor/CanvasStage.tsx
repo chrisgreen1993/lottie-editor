@@ -531,13 +531,13 @@ export function CanvasStage() {
 
       {editorMode === "design" && (
         <div className="pointer-events-none absolute inset-y-0 left-3 flex items-center">
-          <div className="pointer-events-auto flex flex-col gap-0.5 rounded-full bg-card/95 px-1 py-1.5 shadow-lg backdrop-blur">
+          <div className="pointer-events-auto flex flex-col gap-0.5 rounded-panel bg-card/95 px-1 py-1.5 shadow-lg backdrop-blur">
             {TOOLS.map((t) => (
               <IconButton
                 key={t.id}
                 label={t.label}
                 active={tool === t.id}
-                className="rounded-full"
+                className="rounded-control"
                 onClick={() => setTool(t.id)}
               >
                 {t.icon}
@@ -548,7 +548,7 @@ export function CanvasStage() {
       )}
       {tool === "pen" && (
         <div className="pointer-events-none absolute inset-x-0 top-3 flex justify-center">
-          <div className="rounded-md border border-border bg-card/90 px-2 py-0.5 text-meta text-muted-foreground shadow backdrop-blur">
+          <div className="rounded-panel border border-border bg-card/90 px-2 py-0.5 text-meta text-muted-foreground shadow backdrop-blur">
             Click to add points · drag for curves · click the first point to
             close · Enter finishes open · Esc cancels
           </div>
@@ -556,7 +556,7 @@ export function CanvasStage() {
       )}
 
       <div className="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center">
-        <div className="pointer-events-auto flex items-center gap-1 rounded-full bg-card/95 px-2.5 py-1 shadow-lg backdrop-blur">
+        <div className="pointer-events-auto flex items-center gap-1 rounded-panel bg-card/95 px-2.5 py-1 shadow-lg backdrop-blur">
           <IconButton label="Zoom out" onClick={() => zoomBy(1 / 1.25)}>
             <Minus size={14} />
           </IconButton>
