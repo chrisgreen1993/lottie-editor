@@ -438,7 +438,7 @@ export function CanvasStage() {
         <div className="flex w-max min-h-full min-w-full items-center justify-center">
           <div
             className={cn(
-              "relative shrink-0 overflow-hidden rounded-sm shadow-2xl ring-1 ring-border",
+              "relative shrink-0 overflow-hidden rounded-panel shadow-canvas ring-1 ring-border",
               canvasBg === "checker" && "bg-checker",
             )}
             style={{
