@@ -118,7 +118,7 @@ export function TopBar({ onOpenFile }: { onOpenFile: () => void }) {
         <button
           type="button"
           onClick={onOpenFile}
-          className="inline-flex h-8 items-center gap-1.5 rounded-control px-3.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+          className="inline-flex h-7 items-center gap-1.5 rounded-control px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
         >
           <FolderOpen size={14} />
           Open
@@ -130,7 +130,7 @@ export function TopBar({ onOpenFile }: { onOpenFile: () => void }) {
               <PopoverTrigger asChild>
                 <button
                   type="button"
-                  className="inline-flex h-8 items-center gap-1.5 rounded-control bg-primary px-3.5 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+                  className="inline-flex h-7 items-center gap-1.5 rounded-control bg-primary px-3 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90"
                 >
                   <Download size={14} />
                   Export
