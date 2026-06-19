@@ -150,6 +150,9 @@ export function CanvasOverlay({ scale }: { scale: number }) {
   // frame wrapper (lockstep with the artwork preview); measurement pauses so
   // the rAF loop can't fight the transform and make the box stutter.
   const draggingRef = React.useRef(false);
+  // Latest synchronous box-measurement fn, so a drag end can snap the box to
+  // the committed position in the same frame it clears the preview transform.
+  const measureRef = React.useRef<(() => void) | null>(null);
   const lastDownRef = React.useRef<{ time: number; x: number; y: number }>({
     time: 0,
     x: 0,
@@ -167,8 +170,6 @@ export function CanvasOverlay({ scale }: { scale: number }) {
     }
     let raf = 0;
     const measure = () => {
-      // Frozen during a drag — the frame wrapper is transformed directly.
-      if (draggingRef.current) return;
       const node = layerNode(selected);
       const parent = rootRef.current?.parentElement;
       if (!node || !parent) {
@@ -197,13 +198,18 @@ export function CanvasOverlay({ scale }: { scale: number }) {
           : next,
       );
     };
+    measureRef.current = measure;
     const tick = () => {
-      measure();
+      // Frozen during a drag — the frame wrapper is transformed directly.
+      if (!draggingRef.current) measure();
       raf = requestAnimationFrame(tick);
     };
-    measure();
+    if (!draggingRef.current) measure();
     raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
+    return () => {
+      cancelAnimationFrame(raf);
+      measureRef.current = null;
+    };
   }, [doc, selected, scale]);
 
   if (selected === null || !doc)
@@ -302,10 +308,6 @@ export function CanvasOverlay({ scale }: { scale: number }) {
       // The frame box follows with the equivalent screen-space transform.
       if (frame) frame.style.transform = frameTransform(mode, ev, ctx);
     };
-    const resume = () => {
-      if (frame) frame.style.transform = "";
-      draggingRef.current = false;
-    };
     const handleUp = () => {
       target.removeEventListener("pointermove", handleMove);
       target.removeEventListener("pointerup", handleUp);
@@ -314,16 +316,22 @@ export function CanvasOverlay({ scale }: { scale: number }) {
         update((draft) =>
           setTransformAtPlayhead(draft, selected, propKey, ctx.frame, value),
         );
-        // Keep the preview (node transform + frame transform) in place until
-        // the canvas has rebuilt at the committed position, then resume
-        // measuring — avoids a one-frame flash back to the old spot.
-        requestAnimationFrame(() => requestAnimationFrame(resume));
+        // The old node still carries the preview transform (= destination)
+        // and the rebuilt node lands there too, so snap the box to the
+        // measured position AND drop the frame transform in this same frame.
+        // Clearing one without the other is what flashed the box back to the
+        // origin. The node transform is left for the canvas rebuild to
+        // replace.
+        draggingRef.current = false;
+        if (frame) frame.style.transform = "";
+        measureRef.current?.();
       } else {
         if (node) {
           node.style.transform = "";
           node.style.transformOrigin = "";
         }
-        resume();
+        if (frame) frame.style.transform = "";
+        draggingRef.current = false;
       }
     };
     target.addEventListener("pointermove", handleMove);
