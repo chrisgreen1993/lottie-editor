@@ -137,6 +137,56 @@ function frameTransform(
   return `rotate(${deg}deg)`;
 }
 
+/** A snap candidate: a line at `pos` on one axis, spanning `min`..`max` on the
+ *  cross axis (used to draw a guide that connects the aligned objects). */
+interface SnapTarget {
+  pos: number;
+  min: number;
+  max: number;
+}
+interface Guide {
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+}
+/** Alignment-snap targets in overlay-local coords: the artboard edges/centers
+ *  plus every other visible layer's box edges/centers. Built once at drag
+ *  start (other layers don't move during the drag). */
+interface SnapTargets {
+  x: SnapTarget[];
+  y: SnapTarget[];
+}
+
+const SNAP_PX = 6;
+
+/** Snap one axis of the dragged box. `lines` are the three projected lines
+ *  (start/center/end) with their shared cross-extent; returns the delta
+ *  adjustment to apply and the guide to draw, if any target is within range. */
+function snapAxis(
+  lines: { v: number; cMin: number; cMax: number }[],
+  targets: SnapTarget[],
+): { adjust: number; guide: SnapTarget } | null {
+  let best: { adjust: number; guide: SnapTarget; dist: number } | null = null;
+  for (const line of lines) {
+    for (const t of targets) {
+      const dist = Math.abs(t.pos - line.v);
+      if (dist <= SNAP_PX && (!best || dist < best.dist)) {
+        best = {
+          adjust: t.pos - line.v,
+          dist,
+          guide: {
+            pos: t.pos,
+            min: Math.min(t.min, line.cMin),
+            max: Math.max(t.max, line.cMax),
+          },
+        };
+      }
+    }
+  }
+  return best ? { adjust: best.adjust, guide: best.guide } : null;
+}
+
 export function CanvasOverlay({ scale }: { scale: number }) {
   const doc = useEditor((s) => s.doc);
   const selected = useEditor((s) => s.selectedLayer);
@@ -146,6 +196,7 @@ export function CanvasOverlay({ scale }: { scale: number }) {
   const rootRef = React.useRef<HTMLDivElement>(null);
   const frameRef = React.useRef<HTMLDivElement>(null);
   const [box, setBox] = React.useState<Box | null>(null);
+  const [guides, setGuides] = React.useState<Guide[]>([]);
   // While a drag is live the box is moved by a single CSS transform on the
   // frame wrapper (lockstep with the artwork preview); measurement pauses so
   // the rAF loop can't fight the transform and make the box stutter.
@@ -288,6 +339,45 @@ export function CanvasOverlay({ scale }: { scale: number }) {
     let moved = false;
     const propKey = mode === "move" ? "p" : mode === "scale" ? "s" : "r";
 
+    // Alignment-snap targets (move only): artboard + other layers, in
+    // overlay-local coords. Other layers are static during the drag, so this
+    // is computed once. `box` is the selected layer's box in the same space.
+    const parent = rootRef.current?.parentElement;
+    const prect = parent?.getBoundingClientRect();
+    const targets: SnapTargets = { x: [], y: [] };
+    if (mode === "move" && prect && box) {
+      const W = prect.width;
+      const H = prect.height;
+      targets.x.push(
+        { pos: 0, min: 0, max: H },
+        { pos: W / 2, min: 0, max: H },
+        { pos: W, min: 0, max: H },
+      );
+      targets.y.push(
+        { pos: 0, min: 0, max: W },
+        { pos: H / 2, min: 0, max: W },
+        { pos: H, min: 0, max: W },
+      );
+      const layers = state.doc?.layers ?? [];
+      for (let i = 0; i < layers.length; i++) {
+        if (i === selected || layers[i].hd) continue;
+        const r = layerNode(i)?.getBoundingClientRect();
+        if (!r || (r.width < 1 && r.height < 1)) continue;
+        const l = r.left - prect.left;
+        const t = r.top - prect.top;
+        targets.x.push(
+          { pos: l, min: t, max: t + r.height },
+          { pos: l + r.width / 2, min: t, max: t + r.height },
+          { pos: l + r.width, min: t, max: t + r.height },
+        );
+        targets.y.push(
+          { pos: t, min: l, max: l + r.width },
+          { pos: t + r.height / 2, min: l, max: l + r.width },
+          { pos: t + r.height, min: l, max: l + r.width },
+        );
+      }
+    }
+
     const target = e.currentTarget as HTMLElement;
     try {
       target.setPointerCapture(e.pointerId);
@@ -296,6 +386,66 @@ export function CanvasOverlay({ scale }: { scale: number }) {
     }
     const handleMove = (ev: PointerEvent) => {
       moved = true;
+
+      // Move drags snap the box edges/centers to the artboard and other
+      // layers; scale/rotate are unaffected.
+      if (mode === "move" && box && !ev.altKey) {
+        let dx = ev.clientX - ctx.startX;
+        let dy = ev.clientY - ctx.startY;
+        const pl = box.left + dx;
+        const pt = box.top + dy;
+        const xSnap = snapAxis(
+          [
+            { v: pl, cMin: pt, cMax: pt + box.height },
+            { v: pl + box.width / 2, cMin: pt, cMax: pt + box.height },
+            { v: pl + box.width, cMin: pt, cMax: pt + box.height },
+          ],
+          targets.x,
+        );
+        const ySnap = snapAxis(
+          [
+            { v: pt, cMin: pl, cMax: pl + box.width },
+            { v: pt + box.height / 2, cMin: pl, cMax: pl + box.width },
+            { v: pt + box.height, cMin: pl, cMax: pl + box.width },
+          ],
+          targets.y,
+        );
+        if (xSnap) dx += xSnap.adjust;
+        if (ySnap) dy += ySnap.adjust;
+        const next: Guide[] = [];
+        if (xSnap)
+          next.push({
+            x1: xSnap.guide.pos,
+            y1: xSnap.guide.min,
+            x2: xSnap.guide.pos,
+            y2: xSnap.guide.max,
+          });
+        if (ySnap)
+          next.push({
+            x1: ySnap.guide.min,
+            y1: ySnap.guide.pos,
+            x2: ySnap.guide.max,
+            y2: ySnap.guide.pos,
+          });
+        setGuides(next);
+        lastValue = [
+          ctx.startPosition[0] + dx / scale,
+          ctx.startPosition[1] + dy / scale,
+        ];
+        if (node) {
+          node.style.transform = previewMatrix(
+            "move",
+            lastValue,
+            ctx,
+            orig,
+          ).toString();
+        }
+        if (frame) frame.style.transform = `translate(${dx}px, ${dy}px)`;
+        return;
+      }
+
+      // Not snapping this move (scale/rotate, or Alt held) — drop any guides.
+      setGuides((prev) => (prev.length ? [] : prev));
       lastValue = dragValue(mode, ev, ctx, scale);
       if (node) {
         node.style.transform = previewMatrix(
@@ -311,6 +461,7 @@ export function CanvasOverlay({ scale }: { scale: number }) {
     const handleUp = () => {
       target.removeEventListener("pointermove", handleMove);
       target.removeEventListener("pointerup", handleUp);
+      setGuides([]);
       if (moved && lastValue) {
         const value = lastValue;
         update((draft) =>
@@ -353,6 +504,21 @@ export function CanvasOverlay({ scale }: { scale: number }) {
       className="pointer-events-none absolute inset-0"
       data-canvas-overlay
     >
+      {guides.length > 0 && (
+        <svg className="pointer-events-none absolute inset-0 z-raised h-full w-full overflow-visible">
+          {guides.map((g, i) => (
+            <line
+              key={i}
+              x1={g.x1}
+              y1={g.y1}
+              x2={g.x2}
+              y2={g.y2}
+              className="stroke-snapline"
+              strokeWidth={1}
+            />
+          ))}
+        </svg>
+      )}
       {box && (
         <div ref={frameRef} className="pointer-events-none absolute inset-0">
           <div

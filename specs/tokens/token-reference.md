@@ -35,14 +35,15 @@ as complete values.
 
 ## Colors — full-color tokens
 
-| Alias                  | Primitive            | Tailwind utility                | Use for                       |
-| ---------------------- | -------------------- | ------------------------------- | ----------------------------- |
-| `--color-keyframe`     | `--ds-amber-400-hex` | `bg-keyframe` / `fill-keyframe` | Keyframe diamonds, snap guide |
-| `--color-checker-base` | `--ds-checker-base`  | `bg-checker-base`               | Canvas transparency backdrop  |
-| `--color-checker-tile` | `--ds-checker-tile`  | `bg-checker-tile`               | Canvas transparency tiles     |
-| `--color-canvas-dark`  | `--ds-canvas-dark`   | `bg-canvas-dark`                | Dark canvas-bg swatch/fill    |
-| `--color-canvas-light` | `--ds-canvas-light`  | `bg-canvas-light`               | Light canvas-bg swatch/fill   |
-| `--color-on-fill`      | `--ds-white`         | `text-on-fill`                  | Text/icon on a saturated fill |
+| Alias                  | Primitive            | Tailwind utility                | Use for                                |
+| ---------------------- | -------------------- | ------------------------------- | -------------------------------------- |
+| `--color-keyframe`     | `--ds-amber-400-hex` | `bg-keyframe` / `fill-keyframe` | Keyframe diamonds, timeline snap guide |
+| `--color-snapline`     | `--ds-rose-500`      | `stroke-snapline`               | Canvas alignment / snap guide lines    |
+| `--color-checker-base` | `--ds-checker-base`  | `bg-checker-base`               | Canvas transparency backdrop           |
+| `--color-checker-tile` | `--ds-checker-tile`  | `bg-checker-tile`               | Canvas transparency tiles              |
+| `--color-canvas-dark`  | `--ds-canvas-dark`   | `bg-canvas-dark`                | Dark canvas-bg swatch/fill             |
+| `--color-canvas-light` | `--ds-canvas-light`  | `bg-canvas-light`               | Light canvas-bg swatch/fill            |
+| `--color-on-fill`      | `--ds-white`         | `text-on-fill`                  | Text/icon on a saturated fill          |
 
 ## Spacing — 4px base step
 

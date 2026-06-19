@@ -34,6 +34,7 @@ Concretely:
    or API, so specs stay the source of truth.
 
 ### Token layers (`app/tokens.css`)
+
 - **Layer 1 `--ds-*`** — primitives; raw values live here only.
 - **Layer 2** — semantic aliases referencing Layer 1 with a fallback
   (`--color-keyframe: var(--ds-amber-400-hex, #fbbf24)`). This is the API.
@@ -45,6 +46,7 @@ editor's `GRAPH_DIM_COLORS` data palette, imported-artwork fills) are sample
 content, not chrome, and are not tokenized.
 
 ## Build / verify commands
+
 - `npm run dev` — dev server
 - `npm run lint` — ESLint (zero warnings expected)
 - `npm run build` — production build must compile

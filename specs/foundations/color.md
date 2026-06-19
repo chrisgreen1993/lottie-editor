@@ -45,7 +45,8 @@ carries all interaction; amber marks keyframes. Color is defined once in
 
 - `--color-checker-base` / `--color-checker-tile` — transparency grid
 - `--color-canvas-dark` / `--color-canvas-light` — canvas-bg swatches
-- `--color-keyframe` — keyframes, snap guide
+- `--color-keyframe` — keyframes, timeline snap guide
+- `--color-snapline` — canvas alignment guides (drag-snap to layers/artboard)
 
 ## Hover convention
 

@@ -54,6 +54,7 @@ const config = {
         },
         /* Full-color tokens (not HSL channels) — canvas + keyframe accent. */
         keyframe: "var(--color-keyframe)",
+        snapline: "var(--color-snapline)",
         "checker-base": "var(--color-checker-base)",
         "checker-tile": "var(--color-checker-tile)",
         "canvas-dark": "var(--color-canvas-dark)",

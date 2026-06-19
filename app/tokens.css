@@ -39,6 +39,7 @@
   --ds-red-500: 0 72% 56%; /* destructive */
   --ds-amber-400: 43 96% 56%; /* keyframe accent channels */
   --ds-amber-400-hex: #fbbf24; /* keyframe accent, full color */
+  --ds-rose-500: #f43f5e; /* canvas alignment guides */
 
   /* Full-color primitives (used where a complete color, not a channel
    * triplet, is required — canvas surfaces & sample swatches). */
@@ -154,6 +155,9 @@
 
   /* Keyframe / timeline accent (full color, not a channel triplet) */
   --color-keyframe: var(--ds-amber-400-hex, #fbbf24);
+
+  /* Canvas alignment / snap guide lines */
+  --color-snapline: var(--ds-rose-500, #f43f5e);
 
   /* Canvas surfaces */
   --color-checker-base: var(--ds-checker-base, #2a2a2e);
