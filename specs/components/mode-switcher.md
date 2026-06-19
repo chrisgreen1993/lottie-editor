@@ -20,17 +20,18 @@ mounted while a document is open.
 
 ## 3. Anatomy
 
-- **Track** — rounded-pill `--card` surface with a hairline inner pad and a
-  lifting shadow.
+- **Track** — rounded-pill `--background` surface with a hairline inner pad,
+  reading as an inset well on the `--card` top bar.
 - **Segments** — two `<button>`s (`Design`, `Animate`), capitalized; the
   active one fills `--secondary`, the idle one is `--muted-foreground` text.
 
 ## 4. Tokens used
 
-- Surface: track `bg-card`; active segment `bg-secondary`.
+- Surface: track `bg-background` (inset on the card bar); active segment
+  `bg-secondary`.
 - Text: active `--foreground`; idle `--muted-foreground` → `--foreground` on hover.
 - Radius: `--radius-pill` on the track and both segments.
-- Shadow: `--shadow-panel` lifts the track off the transparent bar.
+- Shadow: none — the track is inset, not floating.
 - Type: `--text-body`, weight `--weight-medium`.
 - Motion: `transition-colors` (default timing) on segment hover/active.
 
@@ -48,7 +49,7 @@ function ModeSwitcher(): JSX.Element;
 
 ## 6. States
 
-- **Default:** track `--card`; current mode filled `--secondary`.
+- **Default:** track `--background` (inset); current mode filled `--secondary`.
 - **Hover:** idle segment text → `--foreground` (no fill change).
 - **Active:** the current-mode segment is filled `--secondary` with
   `--foreground` text.
@@ -57,7 +58,7 @@ function ModeSwitcher(): JSX.Element;
 
 ```tsx
 <div
-  className="flex items-center gap-1 rounded-pill bg-card p-0.5 shadow-panel"
+  className="flex items-center gap-1 rounded-pill bg-background p-0.5"
   title="Switch between Design and Animate (Tab)"
 >
   {(["design", "animate"] as EditorMode[]).map((m) => (

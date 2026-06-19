@@ -83,7 +83,7 @@ as complete values.
 | `--radius`         | 8px    | `rounded-lg`      | Base anchor (md/sm derive)  |
 | `--radius-chip`    | 6px    | `rounded-chip`    | Icon buttons, small chips   |
 | `--radius-control` | 8px    | `rounded-control` | Inputs, selects             |
-| `--radius-panel`   | 16px   | `rounded-panel`   | Floating panels             |
+| `--radius-panel`   | 6px    | `rounded-panel`   | Panels, canvas, top bar     |
 | `--radius-pill`    | 9999px | `rounded-pill`    | Buttons, toolbars, switcher |
 | `--radius-handle`  | 2px    | `rounded-handle`  | Vertex/scale handles        |
 

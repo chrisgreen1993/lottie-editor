@@ -46,7 +46,7 @@ graph. It is the primary surface for scrubbing, retiming, and shaping easing.
 
 ## 4. Tokens used
 
-- Surface: card is `--card`/`bg-card` with `--radius-panel`/`rounded-2xl`;
+- Surface: card is `--card`/`bg-card` with `--radius-panel`/`rounded-panel`;
   ruler/transport gutters layer on `--card`, lanes on the `--background` tint.
 - Bars: layer duration bars use `--secondary`/`bg-secondary` (idle),
   `--primary`/`bg-primary` (selected layer), `--muted`-style for hidden layers.

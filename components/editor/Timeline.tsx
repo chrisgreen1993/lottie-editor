@@ -1137,7 +1137,7 @@ export function Timeline() {
 
   return (
     <div
-      className="relative flex shrink-0 flex-col overflow-hidden rounded-2xl bg-card"
+      className="relative flex shrink-0 flex-col overflow-hidden rounded-panel bg-card"
       style={{ height }}
     >
       <ResizeHandle

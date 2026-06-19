@@ -27,7 +27,7 @@ function ModeSwitcher() {
   const setEditorMode = useEditor((s) => s.setEditorMode);
   return (
     <div
-      className="flex items-center gap-1 rounded-full bg-card p-0.5 shadow-lg"
+      className="flex items-center gap-1 rounded-full bg-background p-0.5"
       title="Switch between Design and Animate (Tab)"
     >
       {(["design", "animate"] as EditorMode[]).map((m) => (
@@ -63,7 +63,7 @@ export function TopBar({ onOpenFile }: { onOpenFile: () => void }) {
   const [exportOpen, setExportOpen] = React.useState(false);
 
   return (
-    <header className="relative flex h-12 shrink-0 items-center gap-2 px-4">
+    <header className="relative flex h-12 shrink-0 items-center gap-2 rounded-panel bg-card px-4">
       {doc && (
         <div className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2">
           <ModeSwitcher />
@@ -73,7 +73,7 @@ export function TopBar({ onOpenFile }: { onOpenFile: () => void }) {
         <>
           <IconButton
             label="Close and go home"
-            className="rounded-full hover:bg-card"
+            className="rounded-full hover:bg-accent"
             onClick={() => {
               if (
                 window.confirm(
@@ -87,7 +87,7 @@ export function TopBar({ onOpenFile }: { onOpenFile: () => void }) {
             <Home size={15} />
           </IconButton>
           <input
-            className="h-7 w-48 rounded-lg bg-transparent px-2 text-xs text-foreground transition-colors hover:bg-card focus-visible:bg-card focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            className="h-7 w-48 rounded-lg bg-transparent px-2 text-xs text-foreground transition-colors hover:bg-accent focus-visible:bg-accent focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             value={fileName}
             title="File name"
             onChange={(e) => setFileName(e.target.value)}
@@ -96,7 +96,7 @@ export function TopBar({ onOpenFile }: { onOpenFile: () => void }) {
           <div className="ml-2 flex items-center gap-0.5">
             <IconButton
               label="Undo (⌘Z)"
-              className="rounded-full hover:bg-card"
+              className="rounded-full hover:bg-accent"
               disabled={!canUndo}
               onClick={undo}
             >
@@ -104,7 +104,7 @@ export function TopBar({ onOpenFile }: { onOpenFile: () => void }) {
             </IconButton>
             <IconButton
               label="Redo (⇧⌘Z)"
-              className="rounded-full hover:bg-card"
+              className="rounded-full hover:bg-accent"
               disabled={!canRedo}
               onClick={redo}
             >
@@ -118,7 +118,7 @@ export function TopBar({ onOpenFile }: { onOpenFile: () => void }) {
         <button
           type="button"
           onClick={onOpenFile}
-          className="inline-flex h-8 items-center gap-1.5 rounded-full px-3.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-card hover:text-foreground"
+          className="inline-flex h-8 items-center gap-1.5 rounded-full px-3.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
         >
           <FolderOpen size={14} />
           Open

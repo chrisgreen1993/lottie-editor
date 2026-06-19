@@ -384,7 +384,7 @@ export function Inspector() {
 
   return (
     <aside
-      className="flex shrink-0 flex-col overflow-hidden rounded-2xl bg-card"
+      className="flex shrink-0 flex-col overflow-hidden rounded-panel bg-card"
       style={{ width }}
     >
       <div className="flex h-9 shrink-0 items-center gap-2 border-b border-border px-3">

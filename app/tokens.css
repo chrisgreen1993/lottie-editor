@@ -199,7 +199,7 @@
   /* Radius aliases — `--radius` is the Tailwind anchor (lg/md/sm derive). */
   --radius: var(--ds-radius-lg, 0.5rem);
   --radius-pill: var(--ds-radius-full, 9999px);
-  --radius-panel: var(--ds-radius-2xl, 16px);
+  --radius-panel: var(--ds-radius-md, 6px);
   --radius-control: var(--ds-radius-lg, 8px);
   --radius-chip: var(--ds-radius-md, 6px);
   --radius-handle: var(--ds-radius-xs, 2px);

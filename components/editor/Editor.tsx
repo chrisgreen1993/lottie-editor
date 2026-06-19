@@ -250,7 +250,7 @@ export function Editor() {
 
   return (
     <div
-      className="flex h-screen flex-col overflow-hidden bg-background text-foreground"
+      className="flex h-screen flex-col gap-1 overflow-hidden bg-background p-1 text-foreground"
       onDragEnter={(e) => {
         e.preventDefault();
         dragDepth.current += 1;
@@ -279,7 +279,7 @@ export function Editor() {
       <TopBar onOpenFile={() => fileInputRef.current?.click()} />
 
       {doc ? (
-        <div className="flex min-h-0 flex-1 flex-col gap-1 px-1 pb-1">
+        <div className="flex min-h-0 flex-1 flex-col gap-1">
           <div className="flex min-h-0 flex-1">
             <LayerPanel />
             <PanelDivider panel="layerPanelW" grow={1} />

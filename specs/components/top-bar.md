@@ -11,7 +11,9 @@
 
 The persistent bar across the top of the editor. Hosts document identity
 (Home + file name), history (undo/redo), the centered Design/Animate mode
-switcher, and the right-side actions (Open, Export).
+switcher, and the right-side actions (Open, Export). It's a `--card` surface at
+`--radius-panel`, sharing the same `--space-2xs` layout gutter as the panels so
+its left/right edges line up with them.
 
 - **Use when:** a document is open — it's always mounted by `Editor`.
 - **Don't use for:** canvas tools (those live in the canvas tool rail) or
@@ -31,12 +33,15 @@ switcher, and the right-side actions (Open, Export).
 
 ## 4. Tokens used
 
-- Surface: bar is transparent (sits on `--background`); buttons hover to
-  `--card`. Export uses `bg-primary` / `text-primary-foreground`.
+- Surface: bar is a `--card` card; buttons hover to `--accent` (the in-panel
+  convention, since the bar is now a card surface). Export uses `bg-primary` /
+  `text-primary-foreground`.
 - Text: `--foreground` (file name), `--muted-foreground` (idle controls).
-- Radius: `--radius-pill` on every button and the switcher; `--radius-control`
-  on the file-name field; `--radius-chip` on Export popover items.
-- Shadow: `--shadow-panel` on the switcher; `--shadow-md` on the popover.
+- Radius: `--radius-panel` on the bar card; `--radius-pill` on every button and
+  the switcher; `--radius-control` on the file-name field; `--radius-chip` on
+  Export popover items.
+- Shadow: none on the bar (flat card, like the panels); `--shadow-md` on the
+  popover.
 - Type: `--text-title` is reserved for the (removed) wordmark; controls use
   `--text-body`, popover hints `--text-meta`, weight `--weight-medium`.
 - Motion: `transition-colors` (default timing) on hover.
@@ -53,23 +58,23 @@ function TopBar({ onOpenFile }: { onOpenFile: () => void }): JSX.Element;
 
 ## 6. States
 
-- **Default:** transparent bar; idle buttons `--muted-foreground`.
-- **Hover:** buttons fill `--card`, text → `--foreground`; Export → `bg-primary/90`.
+- **Default:** `--card` bar; idle buttons `--muted-foreground`.
+- **Hover:** buttons fill `--accent`, text → `--foreground`; Export → `bg-primary/90`.
 - **Active:** switcher segment for the current mode filled `--secondary`.
-- **Focus:** file-name field shows `--card` surface + `ring-ring`.
+- **Focus:** file-name field shows `--accent` surface + `ring-ring`.
 - **Disabled:** undo/redo at 40% opacity when no history.
 - **No doc:** only `Open` shows (home/name/switcher/export hidden).
 
 ## 7. Code example
 
 ```tsx
-<header className="relative flex h-12 shrink-0 items-center gap-2 px-4">
+<header className="relative flex h-12 shrink-0 items-center gap-2 rounded-panel bg-card px-4">
   {doc && (
     <div className="absolute left-1/2 top-1/2 z-raised -translate-x-1/2 -translate-y-1/2">
       <ModeSwitcher />
     </div>
   )}
-  <IconButton label="Close and go home" className="rounded-pill hover:bg-card" … />
+  <IconButton label="Close and go home" className="rounded-pill hover:bg-accent" … />
   <input className="h-7 w-48 rounded-control bg-transparent px-2 text-body
                     text-foreground transition-colors hover:bg-card
                     focus-visible:bg-card focus-visible:ring-1 focus-visible:ring-ring" … />
