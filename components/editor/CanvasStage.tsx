@@ -424,14 +424,18 @@ export function CanvasStage() {
     <div className="relative flex min-h-0 min-w-0 flex-1 flex-col bg-background">
       <div
         ref={containerRef}
-        className="flex flex-1 items-center justify-center overflow-auto"
+        className="min-h-0 flex-1 overflow-auto"
         onWheel={(e) => {
           if (!e.ctrlKey && !e.metaKey) return;
           e.preventDefault();
           zoomBy(e.deltaY < 0 ? 1.1 : 1 / 1.1);
         }}
       >
-        <div className="flex min-h-full min-w-full items-center justify-center p-6">
+        {/* w-max lets the wrapper grow to the artboard's width (block width
+            would otherwise clamp to the container and the overflow would
+            center off-screen); min-w/h-full keeps it centered when it fits.
+            Together the whole canvas stays scrollable from the (0,0) origin. */}
+        <div className="flex w-max min-h-full min-w-full items-center justify-center p-6">
           <div
             className={cn(
               "relative shrink-0 overflow-hidden rounded-sm shadow-2xl ring-1 ring-border",
